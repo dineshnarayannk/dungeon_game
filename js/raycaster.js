@@ -1,5 +1,5 @@
-const W = window.innerWidth;
-const H = window.innerHeight - 60;
+const W = Math.min(window.innerWidth, 960);
+const H = Math.min(window.innerHeight - 60, 540);
 const HALF = H / 2 ;
 const FOV = Math.PI / 3;
 const RAYS = 160;
