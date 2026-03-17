@@ -14,21 +14,21 @@ dungeon3d/
 
 ├── css/
 
-│   └── style.css     ← Dark theme, HUD bars, layout
+│       └── style.css     ← Dark theme, HUD bars, layout
 
 └── js/
 
-    ├── map.js        ← Dungeon grid layout (16x16)
+        ├── map.js        ← Dungeon grid layout (16x16)
 
-    ├── player.js     ← Player state, movement, keyboard input
+        ├── player.js     ← Player state, movement, keyboard input
 
-    ├── raycaster.js  ← 3D raycasting engine (core of the game)
+        ├── raycaster.js  ← 3D raycasting engine (core of the game)
 
-    ├── sprites.js    ← Coins, keys, and collection logic
+        ├── sprites.js    ← Coins, keys, and collection logic
 
-    ├── enemies.js    ← Enemy AI, movement, and damage
+        ├── enemies.js    ← Enemy AI, movement, and damage
 
-    └── game.js       ← Main loop, HUD, minimap, start screen
+        └── game.js       ← Main loop, HUD, minimap, start screen
 
 🕹️ How to Play
 
@@ -63,9 +63,10 @@ If HP reaches 0 → Game Over → press R to restart
 
 
 🚀 Getting Started
+
 Option 1: VS Code Live Server (Recommended)
 bash# 1. Clone or download the project
-git clone https://github.com/yourusername/dungeon3d.git
+git clone https://github.com/yourusername/dungeon3d.git \n
 cd dungeon3d
 
 # 2. Open in VS Code
