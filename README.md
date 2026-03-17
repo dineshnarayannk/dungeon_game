@@ -7,21 +7,34 @@ A browser-based 3D dungeon game built with pure HTML, CSS and JavaScript — no 
 Open index.html with Live Server in VS Code and press Space to start!
 
 📁 Project Structure
+
 dungeon3d/
+
 ├── index.html        ← Game canvas, HUD, and script loader
+
 ├── css/
+
 │   └── style.css     ← Dark theme, HUD bars, layout
+
 └── js/
+
     ├── map.js        ← Dungeon grid layout (16x16)
+
     ├── player.js     ← Player state, movement, keyboard input
+
     ├── raycaster.js  ← 3D raycasting engine (core of the game)
+
     ├── sprites.js    ← Coins, keys, and collection logic
+
     ├── enemies.js    ← Enemy AI, movement, and damage
+
     └── game.js       ← Main loop, HUD, minimap, start screen
 
 🕹️ How to Play
+
 Controls
-KeyActionW or Arrow UpMove forwardS or Arrow DownMove backwardA or Arrow LeftTurn leftD or Arrow RightTurn rightSpaceStart the gameRRestart the game
+
+KeyAction W or Arrow UpMove forward S or Arrow DownMove backward A or Arrow LeftTurn left D or Arrow RightTurn rightSpaceStart the gameRRestart the game
 Objective
 
 Explore the dungeon and collect all 3 keys hidden around the map
@@ -29,12 +42,16 @@ Watch the key counter in the top bar (0/3 → 1/3 → 2/3 → 3/3)
 Once all 3 keys are collected, navigate to the bottom-right corner of the dungeon (position 14, 14) to escape and win!
 
 Key Locations
+
 KeyColourMap PositionKey 1🟡 GoldTop-right corner (14, 2)Key 2🔵 BlueBottom-left corner (1, 13)Key 3🩷 PinkBottom-right corner (13, 13)
 Collectibles
 
 💰 Coins — Gold glowing circles scattered around the dungeon. Walk into them for +10 score
+
 🔑 Keys — Walk into them to collect. All 3 needed to unlock the exit
+
 ❤️ HP Pickups — Restores health when collected
+
 🛡️ Shield Pickups — Temporary invincibility
 
 Enemies
