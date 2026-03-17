@@ -52,6 +52,7 @@ function updateEnemies() {
         // Deal damage when touching the player
         if (dist < 0.5 ) {
             player.hp = Math.max(0, player.hp - 0.5);
+            triggerDamageFlash();
         }
 
         // Check for Player death

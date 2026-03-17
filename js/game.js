@@ -47,53 +47,87 @@ function drawMinimap() {
 }
 // Draw HUD overlay: Health bar, key icons, flash messages
 function drawHUD() {
-    // Health Bar
-    let hpPct = player.hp / 100 ;
-    ctx.fillStyle = '#1a1a1a';
-    ctx.fillRect(10, H - 20 , 100 , 8);
-    ctx.fillStyle = hpPct > 0.5 ? '#2ecc71' : hpPct > 0.25 ? '#f39c12' : '#e74c3c';
-    ctx.fillRect(10, H - 20, hpPct * 100, 8);
-    // Key icons at bottom left
-    for (let i = 0; i < 3; i++){
-        ctx.fillStyle = i < collectedKeys ? '#FFD700' : '#333' ;
-        ctx.fillRect(10 + i*18, H - 35, 12,10);
-        ctx.beginPath();
-        ctx.arc(10 + i*18 + 6, H - 36, 5, 0, Math.PI*2);
-        ctx.fill();
-    }
-    // Flash Message (eg: '+10 COIN!')
-    if (flashTimer > 0 ){
-        ctx.fillStyle = `rgba(255,255,255,${flashTimer/40*0.9})`;
-        ctx.font = 'bold 20px monospace';
-        ctx.textAlign = 'center';
-        ctx.fillText(flashMsg,W/2, HALF - 30);
-        flashTimer--;
-    }
-    // Win Screen
-    if (gameState === 'win'){
-        ctx.fillStyle = 'rgba(0,0,0,0.7)';
-        ctx.fillRect(0,0,W,H);
-        ctx.fillStyle = '#FFD700';
-        ctx.font = 'bold 36px monospace';
-        ctx.textAlign = 'center' ;
-        ctx.fillText('YOU ESCAPED!', W/2, H/2 - 20);
-        ctx.fillStyle = '#aaa';
-        ctx.font = '14px monospace';
-        ctx.fillText('Score: '+score+'  |   Press R to play again', W/2, H/2 + 20);
-    }
-    // Death Screen
-    if (gameState === 'dead'){
-        ctx.fillStyle = 'rgba(80,0,0,0.75)';
-        ctx.fillRect(0,0,W,H);
-        ctx.fillStyle = '#e74c3c';
-        ctx.font = 'bold 36px monospace' ;
-        ctx.textAlign = 'center';
-        ctx.fillText('YOU DIED', W/2, H/2 - 20);
-        ctx.fillStyle = '#aaa';
-        ctx.font = '14px monospace';
-        ctx.fillText('Press R to restart', W/2, H/2 + 20);
-    }
-    ctx.textAlign = 'left';
+
+  // 1. Sharp red flash when hit by enemy
+  if (damageFlashTimer > 0) {
+    ctx.fillStyle = `rgba(200,0,0,${damageFlashTimer / 12 * 0.25})`;
+    ctx.fillRect(0, 0, W, H);
+    damageFlashTimer--;
+  }
+
+  // 2. Pulsing red overlay when HP below 50
+  if (player.hp < 50) {
+    let intensity = (50 - player.hp) / 50 * 0.18;
+    let pulse = 0.5 + 0.5 * Math.sin(Date.now() * 0.005);
+    ctx.fillStyle = `rgba(180,0,0,${intensity * pulse})`;
+    ctx.fillRect(0, 0, W, H);
+  }
+
+  // 3. Red vignette border — only around edges, center stays clear
+  if (player.hp < 75) {
+    let edgeIntensity = (75 - player.hp) / 75 * 0.45;
+    let gradient = ctx.createRadialGradient(
+      W / 2, H / 2, H * 0.45,
+      W / 2, H / 2, H * 0.95
+    );
+    gradient.addColorStop(0, 'rgba(180,0,0,0)');
+    gradient.addColorStop(1, `rgba(180,0,0,${edgeIntensity})`);
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, W, H);
+  }
+
+  // Health bar
+  let hpPct = player.hp / 100;
+  ctx.fillStyle = '#1a1a1a';
+  ctx.fillRect(10, H - 20, 100, 8);
+  ctx.fillStyle = hpPct > 0.5 ? '#2ecc71' : hpPct > 0.25 ? '#f39c12' : '#e74c3c';
+  ctx.fillRect(10, H - 20, hpPct * 100, 8);
+
+  // Key icons at bottom left
+  for (let i = 0; i < 3; i++) {
+    ctx.fillStyle = i < collectedKeys ? '#FFD700' : '#333';
+    ctx.fillRect(10 + i * 18, H - 35, 12, 10);
+    ctx.beginPath();
+    ctx.arc(10 + i * 18 + 6, H - 36, 5, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // Flash message
+  if (flashTimer > 0) {
+    ctx.fillStyle = `rgba(255,255,255,${flashTimer / 40 * 0.9})`;
+    ctx.font = 'bold 20px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText(flashMsg, W / 2, HALF - 30);
+    flashTimer--;
+  }
+
+  // Win screen
+  if (gameState === 'win') {
+    ctx.fillStyle = 'rgba(0,0,0,0.7)';
+    ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = '#FFD700';
+    ctx.font = 'bold 36px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('YOU ESCAPED!', W / 2, H / 2 - 20);
+    ctx.fillStyle = '#aaa';
+    ctx.font = '14px monospace';
+    ctx.fillText('Score: ' + score + '  |  Press R to play again', W / 2, H / 2 + 20);
+  }
+
+  // Death screen
+  if (gameState === 'dead') {
+    ctx.fillStyle = 'rgba(80,0,0,0.75)';
+    ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = '#e74c3c';
+    ctx.font = 'bold 36px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('YOU DIED', W / 2, H / 2 - 20);
+    ctx.fillStyle = '#aaa';
+    ctx.font = '14px monospace';
+    ctx.fillText('Press R to restart', W / 2, H / 2 + 20);
+  }
+
+  ctx.textAlign = 'left';
 }
 
 // Update HTML HUD Elements
@@ -120,10 +154,11 @@ function loop() {
     requestAnimationFrame(loop);
 }
 
-// Start the game!!
-// initGame();
-// loop();
+let damageFlashTimer = 0;
 
+function triggerDamageFlash() {
+    damageFlashTimer = 12;
+}
 
 let gameStarted = false ;
 
