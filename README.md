@@ -1,7 +1,9 @@
-🏰 Dungeon 3D
+🏰 DUNGEON 3D
+
 A browser-based 3D dungeon game built with pure HTML, CSS and JavaScript — no game engine, no frameworks, no installs. Uses a raycasting engine (the same technique as Wolfenstein 3D and Doom) to render a 3D world in real time.
 
 🎮 Demo
+
 Open index.html with Live Server in VS Code and press Space to start!
 
 📁 Project Structure
