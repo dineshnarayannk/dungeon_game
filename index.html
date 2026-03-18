@@ -1,47 +1,46 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dungeon 3D</title>
-    <link rel="stylesheet" href="css/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dungeon 3D</title>
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <div id="wrap">
-        <!-- TOP HUD BAR-->
-        <div id="top-bar">
-            <span id="title">DUNGEON 3D</span>
-            <div id="hud-row">
-                <div class="hud-item">HP: <span id="hp-val">100</span></div>
-                <div class="hud-item">COINS: <span id="coin-val">0</span></div>
-                <div class="hud-item">KEYS: <span id="key-val">0/3</span></div>
-                <div class="hud-item">POS: <span id="pos-val">-</span></div>
-                <div class="hud-item">SCORE: <span id="score-val">0</span></div>
-                <div class="hud-item">KILLS: <span id="kill-val">0</span></div>
-                <div class="hud-item">AMMO: <span id="ammo-val">30</span></div>
-                <div class="hud-item">WAVE: <span id="wave-val">1</span></div>
-            </div>
-        </div>
+  <div id="wrap">
 
-        <!-- GAME CANVAS (640x360 pixels) -->
-        <canvas id="gamecanvas" width="640" height="360"></canvas>
-
-        <!-- BOTTOM CONTROLS BAR -->
-        <div id="bot-bar">
-            <div class="key-badge"><b>W A S D</b> move</div>
-            <div class="key-badge"><b>Arrow Keys</b> look</div>
-            <div class="key-badge"><b>R</b> restart</div>
-            <div class="key-badge"><b>SPACE</b> shoot</div>"
-            <div id="msg">Collect 3 keys then reach the exit!</div>
-        </div>
+    <div id="top-bar">
+      <span id="level-title">DUNGEON 3D</span>
+      <div id="hud-row">
+        <div class="hud-item">HP: <span id="hp-val">100</span></div>
+        <div class="hud-item">COINS: <span id="coin-val">0</span></div>
+        <div class="hud-item">KEYS: <span id="key-val">0/3</span></div>
+        <div class="hud-item">POS: <span id="pos-val">-</span></div>
+        <div class="hud-item">SCORE: <span id="score-val">0</span></div>
+        <div class="hud-item">KILLS: <span id="kill-val">0</span></div>
+        <div class="hud-item">AMMO: <span id="ammo-val">30</span></div>
+        <div class="hud-item">WAVE: <span id="wave-val">1</span></div>
+        <div class="hud-item">LVL: <span id="lvl-val">1</span></div>
+      </div>
     </div>
 
-<!-- Load JS files in correct order -->
-<script src="js/map.js"></script>
-<script src="js/player.js"></script>
-<script src="js/raycaster.js"></script>
-<script src="js/sprites.js"></script>
-<script src="js/enemies.js"></script>
-<script src="js/game.js"></script>
+    <canvas id="gamecanvas"></canvas>
+
+    <div id="bot-bar">
+      <div class="key-badge"><b>W A S D</b> move</div>
+      <div class="key-badge"><b>Arrow Keys</b> look</div>
+      <div class="key-badge"><b>R</b> restart</div>
+      <div class="key-badge"><b>SPACE</b> shoot</div>
+      <div id="msg">Collect 3 keys then reach the exit!</div>
+    </div>
+
+  </div>
+
+  <script src="js/map.js"></script>
+  <script src="js/player.js"></script>
+  <script src="js/raycaster.js"></script>
+  <script src="js/sprites.js"></script>
+  <script src="js/enemies.js"></script>
+  <script src="js/game.js"></script>
 </body>
 </html>
