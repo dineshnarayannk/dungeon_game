@@ -66,7 +66,7 @@ If HP reaches 0 → Game Over → press R to restart
 
 Option 1: VS Code Live Server (Recommended)
 bash# 1. Clone or download the project
-git clone https://github.com/yourusername/dungeon3d.git
+git clone https://github.com/dineshnarayannk/dungeon_game.git
 cd dungeon3d
 
 # 2. Open in VS Code
