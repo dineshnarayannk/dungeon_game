@@ -380,7 +380,7 @@ function drawHUD() {
     ctx.fillText('YOU ESCAPED!', W / 2, H / 2 - 60);
     ctx.fillStyle = '#fff';
     ctx.font      = '24px monospace';
-    ctx.fillText('ALL 3 LEVELS COMPLETED!', W / 2, H / 2 - 10);
+    ctx.fillText('ALL 5 LEVELS COMPLETED!', W / 2, H / 2 - 10);
     ctx.fillStyle = '#aaa';
     ctx.font      = '20px monospace';
     ctx.fillText('Final Score: ' + score + '   Total Kills: ' + kills, W / 2, H / 2 + 40);
@@ -415,19 +415,23 @@ function drawHUD() {
     ctx.fillStyle = '#7c6fff';
     ctx.font      = 'bold 52px monospace';
     ctx.textAlign = 'center';
-    ctx.fillText('DUNGEON 3D', W / 2, H / 2 - 110);
+    ctx.fillText('DUNGEON 3D', W / 2, H / 2 - 150);
 
     ctx.fillStyle = '#e8b84b';
     ctx.font      = 'bold 20px monospace';
-    ctx.fillText('3 LEVELS  —  SURVIVE  —  ESCAPE', W / 2, H / 2 - 65);
+    ctx.fillText('3 LEVELS  —  SURVIVE  —  ESCAPE', W / 2, H / 2 - 105);
 
     ctx.fillStyle = '#7c6fff';
     ctx.font      = 'bold 17px monospace';
-    ctx.fillText('LEVEL 1  —  THE DUNGEON', W / 2, H / 2 - 15);
+    ctx.fillText('LEVEL 1  —  THE DUNGEON', W / 2, H / 2 - 45);
     ctx.fillStyle = '#2ecc71';
-    ctx.fillText('LEVEL 2  —  THE MAZE',    W / 2, H / 2 + 16);
+    ctx.fillText('LEVEL 2  —  THE MAZE',    W / 2, H / 2 - 20);
     ctx.fillStyle = '#e74c3c';
-    ctx.fillText('LEVEL 3  —  THE FORTRESS', W / 2, H / 2 + 47);
+    ctx.fillText('LEVEL 3  —  THE FORTRESS', W / 2, H / 2 + 5);
+    ctx.fillStyle = '#9b59b6';
+    ctx.fillText('LEVEL 4  —  THE CATACOMBS',W/2 , H/2 + 28);
+    ctx.fillStyle = '#888888';
+    ctx.fillText('LEVEL 5  —  THE ABYSS', W/2, H/2 + 50);
 
     ctx.fillStyle = '#ffffff';
     ctx.font      = 'bold 26px monospace';
