@@ -524,7 +524,7 @@ function drawHUD() {
 
     ctx.fillStyle = '#e8b84b';
     ctx.font      = 'bold 20px monospace';
-    ctx.fillText('3 LEVELS  —  SURVIVE  —  ESCAPE', W / 2, H / 2 - 105);
+    ctx.fillText('6 LEVELS  —  SURVIVE  —  ESCAPE', W / 2, H / 2 - 105);
 
     ctx.fillStyle = '#7c6fff';
     ctx.font      = 'bold 17px monospace';
