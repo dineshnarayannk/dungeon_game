@@ -25,7 +25,14 @@ function loadLevel(idx) {
   player.x     = lv.playerStart.x;
   player.y     = lv.playerStart.y;
   player.angle = 0;
-  player.hp    = Math.min(100, player.hp + 30);
+  if (idx === LEVELS.length - 1){
+    // Boss arena - fully restore HP and ammo
+    player.hp = 100;
+    ammo = 35;
+    initBoss();
+  }else {
+    player.hp = Math.min(100,player.hp + 30) ;
+  }
 
   ammo         = 30;
   wave         = 1;
@@ -37,12 +44,13 @@ function loadLevel(idx) {
   initSprites();
 
   if (spawnInterval) clearInterval(spawnInterval);
-  spawnWave(lv.spawnCount, lv);
-
-  spawnInterval = setInterval(() => {
-    if (gameState !== 'playing') return;
-    spawnOneEnemy(lv);
-  }, 7000);
+  if (idx < LEVELS.length - 1){
+    spawnWave(lv.spawnCount, lv);
+    spawnInterval = setInterval(() => {
+      if (gameState !== 'playing') return;
+      spawnOneEnemy(lv);
+    }, 7000);
+  }
 
   document.getElementById('level-title').textContent =
     'DUNGEON 3D  —  LEVEL ' + (idx + 1) + ': ' + lv.name;
@@ -77,6 +85,46 @@ function shoot() {
     let by = player.y + sin * d;
     if (isWall(bx, by)) break;
 
+    // BOSS Hit check 
+    if (currentLevel === LEVELS.length - 1 && boss.alive) {
+      let dx = boss.x - bx , dy = boss.y - by;
+      if (Math.sqrt(dx*dx + dy*dy) < 0.7){
+        boss.hp--;
+        boss.flashTimer = 8;
+
+        // Blood Particles
+        for (let p = 0; p < 8 ; p++){
+          particles.push({
+            x: boss.x, y: boss.y,
+            vx: (Math.random() - 0.5) * 0.06,
+            vy: (Math.random() - 0.5) * 0.06,
+            life: 25, maxLife: 25,
+            color: boss.hp / boss.maxHp < 0.5 ? '#ff6600' : '#cc0000',
+          });
+        }
+        if (boss.hp <= 0){
+          boss.alive = false ;
+          kills++;
+          score += 500;
+          exitVisible = true;
+          killFeed.unshift({msg: 'BOSS DEFEATED!  +500', timer:120});
+          if (killFeed.length > 4) killFeed.pop();
+          // Golden particles burst at exit location
+          for (let p = 0; p< 20 ; p++){
+            particles.push({
+              x: LEVELS[currentLevel].exit.x,
+              y: LEVELS[currentLevel].exit.y,
+              vx: (Math.random() - 0.5) * 0.1,
+              vy: (Math.random() - 0.5) * 0.1,
+              life: 40, maxLife: 40,
+              color: '#FFD700',
+            });
+          }
+        }
+        return ;
+      }
+    }
+    // --NORMAL ENEMY HIT CHECK
     for (let e of enemies) {
       if (!e.alive) continue;
       let dx = e.x - bx, dy = e.y - by;
@@ -192,11 +240,49 @@ function drawMinimap() {
   }
 
   // Exit dot
-  const exPos = LEVELS[currentLevel].exit;
-  ctx.fillStyle = '#FFD700';
+  if (currentLevel !== LEVELS.length - 1){
+    const exPos = LEVELS[currentLevel].exit;
+    ctx.fillStyle = '#FFD700';
+    ctx.beginPath();
+    ctx.arc(ox + exPos.x * ms, oy + exPos.y * ms, 3, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // Boss dot on minimap
+  if (currentLevel === LEVELS.length - 1 && boss.alive) {
+    ctx.fillStye = '#ff0000' ;
+    ctx.beginPath();
+    ctx.arc(ox , boss.x * ms, oy + boss.y * ms, 3, 0, Math.PI*2);
+    ctx.fill();
+    ctx.closePath();
+  }
+
+  // Player dot
+  ctx.fillStyle = '#7c6fff';
   ctx.beginPath();
-  ctx.arc(ox + exPos.x * ms, oy + exPos.y * ms, 3, 0, Math.PI * 2);
+  ctx.arc(ox + player.x * ms, oy + player.y * ms, 3, 0, Math.PI * 2);
   ctx.fill();
+  ctx.closePath();
+
+  // Direction line
+  ctx.strokeStyle = '#7c6fff';
+  ctx.lineWidth   = 1;
+  ctx.beginPath();
+  ctx.moveTo(ox + player.x * ms, oy + player.y * ms);
+  ctx.lineTo(
+    ox + (player.x + Math.cos(player.angle) * 1.5) * ms,
+    oy + (player.y + Math.sin(player.angle) * 1.5) * ms
+  );
+  ctx.stroke();
+  ctx.closePath();
+  
+  // Exit gate dot on minimap 
+  if (currentLevel === LEVELS.length - 1 && exitVisible){
+    ctx.fillStyle = '#00FF88';
+    ctx.beginPath();
+    ctx.arc(ox + LEVELS[currentLevel].exit.x * ms, oy + LEVELS[currentLevel].exit.y * ms, 4, 0, Math.PI * 2);
+    ctx.fill();
+  }
 
   // Key Dot
   keys_items.forEach(k => {
@@ -221,23 +307,6 @@ function drawMinimap() {
     ctx.arc(ox + e.x * ms, oy + e.y * ms, 2, 0, Math.PI * 2);
     ctx.fill();
   });
-
-  // Player dot
-  ctx.fillStyle = '#7c6fff';
-  ctx.beginPath();
-  ctx.arc(ox + player.x * ms, oy + player.y * ms, 3, 0, Math.PI * 2);
-  ctx.fill();
-
-  // Direction line
-  ctx.strokeStyle = '#7c6fff';
-  ctx.lineWidth   = 1;
-  ctx.beginPath();
-  ctx.moveTo(ox + player.x * ms, oy + player.y * ms);
-  ctx.lineTo(
-    ox + (player.x + Math.cos(player.angle) * 1.5) * ms,
-    oy + (player.y + Math.sin(player.angle) * 1.5) * ms
-  );
-  ctx.stroke();
 }
 
 // ── DRAW HUD ──────────────────────────────────────────────────
@@ -319,7 +388,7 @@ function drawHUD() {
   ctx.textAlign = 'left';
 
   // Wave / level banner
-  if (waveTimer > 0) {
+  if (waveTimer > 0 && currentLevel !== LEVELS.length - 1) {
     let alpha = Math.min(1, waveTimer / 40);
     ctx.fillStyle = `rgba(255,200,0,${alpha})`;
     ctx.font      = 'bold 32px monospace';
@@ -370,23 +439,59 @@ function drawHUD() {
     }
   }
 
+  // Boss intro banner
+  if (currentLevel === LEVELS.length - 1 && introTimer > 0){
+    let alpha = Math.min(1, introTimer / 30);
+    ctx.fillStyle = `rgba(0,0,0,${alpha * 0.85})`;
+    ctx.fillRect(0,0,W,H);
+    ctx.fillStyle = `rgba(220,0,0,${alpha})`;
+    ctx.font = 'bold 48px monospace'; ctx.textAlign = 'center';
+    ctx.fillText('FINAL BOSS',W/2, H/2 - 30);
+    ctx.fillStyle = `rgba(255,150,0,${alpha})`;
+    ctx.font = 'bold 20px monospace';
+    ctx.fillText('Defeat the boss to open the exit!', W/2 , H/2 + 20);
+    ctx.fillStyle = `rgba(0,255,136,${alpha * 0.8})`;
+    ctx.font = '16px monospace';
+    ctx.fillText('HP and AMMO fully restored — Good luck!',W/2,H/2 + 55);
+    ctx.textAlign = 'left';
+  }
+
+  // Boss enraged warning 
+  if (currentLevel === LEVELS.length - 1 && boss.alive && boss.hp / boss.maxHp < 0.5){
+    let pulse = 0.5 + 0.5 * Math.sin(Date.now() * 0.008);
+    ctx.fillStyle = `rgba(255,100,0,${pulse * 0.8})`;
+    ctx.font = 'bold 15px monospace'; ctx.textAlign = 'center' ;
+    ctx.fillText('BOSS ENRAGED!',W/2,H - 60);
+    ctx.textAlign = 'left';
+  }
+
+  // Exit open hint
+  if (currentLevel == LEVELS.length - 1 && exitVisible) {
+    let pulse = 0.6 + 0.4 * Math.sin(Date.now() * 0.004);
+    ctx.fillStyle = `rgba(0,255,136,${pulse})`;
+    ctx.font = 'bold 16px monospace'; ctx.textAlign = 'center' ;
+    ctx.fillText('EXIT GATE OPEN - REACH IT TO WIN!',W/2,H - 55);
+    ctx.textAlign = 'left';
+  }
+
   // Win screen
   if (gameState === 'win') {
-    ctx.fillStyle = 'rgba(0,0,0,0.82)';
-    ctx.fillRect(0, 0, W, H);
-    ctx.fillStyle = '#FFD700';
-    ctx.font      = 'bold 40px monospace';
-    ctx.textAlign = 'center';
-    ctx.fillText('YOU ESCAPED!', W / 2, H / 2 - 60);
-    ctx.fillStyle = '#fff';
-    ctx.font      = '24px monospace';
-    ctx.fillText('ALL 5 LEVELS COMPLETED!', W / 2, H / 2 - 10);
-    ctx.fillStyle = '#aaa';
-    ctx.font      = '20px monospace';
-    ctx.fillText('Final Score: ' + score + '   Total Kills: ' + kills, W / 2, H / 2 + 40);
-    ctx.fillStyle = '#7c6fff';
-    ctx.font      = '16px monospace';
-    ctx.fillText('Press R to play again', W / 2, H / 2 + 85);
+    ctx.fillStyle = 'rgba(0,0,0,0.88)'; ctx.fillRect(0,0,W,H);
+    if (currentLevel === LEVELS.length - 1){
+      ctx.fillStyle = '#FFD700'; ctx.font = 'bold 44px monospace'; ctx.textAlign = 'center';
+      ctx.fillText('BOSS DEFEATED!', W/2 , H/2 - 70);
+      ctx.fillStyle = '#00FF88'; ctx.font = 'bold 28px monospace';
+      ctx.fillText('ALL LEVELS COMPLETE!',W/2, H/2 - 20);
+    } else {
+      ctx.fillStyle = '#FFD700'; ctx.font = 'bold 40px monospace'; ctx.textAlign = 'center';
+      ctx.fillText('YOU ESCAPED!',W/2 , H/2 - 70);
+      ctx.fillStyle = '#fff'; ctx.font = 'bold 24px monospace';
+      ctx.fillText('ALL LEVELS COMPLETED!',W/2 , H/2 - 20);
+    }
+    ctx.fillStyle = '#aaa'; ctx.font = '20px monospace';
+    ctx.fillText('Final Score: ' + score + '  Kills: ' + kills,W/2 , H/2 + 30);
+    ctx.fillStyle = '#7c6fff'; ctx.font = '16px monospace';
+    ctx.fillText('Press R to play again', W/2, H/2 + 75);
     ctx.textAlign = 'left';
   }
 
@@ -423,15 +528,17 @@ function drawHUD() {
 
     ctx.fillStyle = '#7c6fff';
     ctx.font      = 'bold 17px monospace';
-    ctx.fillText('LEVEL 1  —  THE DUNGEON', W / 2, H / 2 - 45);
+    ctx.fillText('LEVEL 1  —  THE DUNGEON', W / 2, H / 2 - 55);
     ctx.fillStyle = '#2ecc71';
-    ctx.fillText('LEVEL 2  —  THE MAZE',    W / 2, H / 2 - 20);
+    ctx.fillText('LEVEL 2  —  THE MAZE',    W / 2, H / 2 - 35);
     ctx.fillStyle = '#e74c3c';
-    ctx.fillText('LEVEL 3  —  THE FORTRESS', W / 2, H / 2 + 5);
+    ctx.fillText('LEVEL 3  —  THE FORTRESS', W / 2, H / 2 - 15);
     ctx.fillStyle = '#9b59b6';
-    ctx.fillText('LEVEL 4  —  THE CATACOMBS',W/2 , H/2 + 28);
+    ctx.fillText('LEVEL 4  —  THE CATACOMBS',W/2 , H/2 + 5);
     ctx.fillStyle = '#888888';
-    ctx.fillText('LEVEL 5  —  THE ABYSS', W/2, H/2 + 50);
+    ctx.fillText('LEVEL 5  —  THE ABYSS', W/2, H/2 + 25);
+    ctx.fillStyle = '#e74c3c';
+    ctx.fillText('FINAL BOSS  —  THE ARENA',W/2 , H/2 + 45);
 
     ctx.fillStyle = '#ffffff';
     ctx.font      = 'bold 26px monospace';
@@ -464,14 +571,27 @@ function loop() {
   if (gameState === 'playing') {
     updateEnemies();
     collectItems();
+    if (currentLevel === LEVELS.length - 1){
+      updateBoss();
+      checkExit();
+      if (introTimer > 0) introTimer--;
+    }
   }
   drawScene();
   drawSprites();
   drawEnemies();
-  drawParticles();
-  drawGun();
+  if (currentLevel === LEVELS.length - 1){
+    drawExit();
+    drawBoss();
+    drawParticles();
+    drawGun();
+    drawBossHPBar();
+  } else {
+    drawParticles();
+    drawGun();
+  }
   drawHUD();
-  drawMinimap();
+  if (gameState !== 'start') drawMinimap();
   updateHUD();
   requestAnimationFrame(loop);
 }

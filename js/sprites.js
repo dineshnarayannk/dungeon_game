@@ -15,7 +15,7 @@ function initSprites() {
   }));
 
   // Coins scattered around the dungeon
-  coins = [
+  coins = currentLevel === LEVELS.length - 1 ? [] : [
     { x:3.5,  y:2.5,  alive:true },
     { x:7.5,  y:1.5,  alive:true },
     { x:2.5,  y:7.5,  alive:true },
@@ -122,12 +122,16 @@ function collectItems() {
     collectedKeys >= lv.keysNeeded &&
     Math.sqrt((ex.x - player.x) ** 2 + (ex.y - player.y) ** 2) < 0.8
   ) {
-    if (currentLevel < LEVELS.length - 1) {
-      gameState       = 'levelcomplete';
+    if (currentLevel < LEVELS.length - 2){
+      // Normal level complete - go to next level
+      gameState = 'levelcomplete';
       levelTransTimer = 180;
-      levelTransMsg   = 'LEVEL ' + (currentLevel + 1) + ' COMPLETE!';
-    } else {
-      gameState = 'win';
+      levelTransMsg = 'LEVEL ' + (currentLevel + 1) + ' COMPLETE!';
+    } else if (currentLevel === LEVELS.length - 2) {
+      // Level 5 complete - go to boss arena
+      gameState = 'levelcomplete';
+      levelTransTimer = 180;
+      levelTransMsg = 'LEVEL 5 COMPLETE ! FINAL BOSS AWAITS...';
     }
   }
 }
