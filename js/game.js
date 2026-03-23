@@ -77,6 +77,8 @@ function shoot() {
   shootCooldown = 15;
   muzzleFlash   = 6;
 
+  playSound('shoot');
+
   let sin = Math.sin(player.angle);
   let cos = Math.cos(player.angle);
 
@@ -104,6 +106,7 @@ function shoot() {
         }
         if (boss.hp <= 0){
           boss.alive = false ;
+          playSound('enemyDie');
           kills++;
           score += 500;
           exitVisible = true;
@@ -142,6 +145,7 @@ function shoot() {
         }
         if (e.hp <= 0) {
           e.alive = false;
+          playSound('enemyDie');
           kills++;
           score += 100;
           killFeed.unshift({ msg: '+100  ENEMY DOWN', timer: 60 });

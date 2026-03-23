@@ -100,6 +100,7 @@ function collectItems() {
       score   += 10;
       flashMsg = '+10 COIN!';
       flashTimer = 40;
+      playSound('coin');
     }
   });
 
@@ -112,6 +113,7 @@ function collectItems() {
       score  += 200;
       flashMsg   = 'KEY ' + collectedKeys + '/' + LEVELS[currentLevel].keysNeeded + ' COLLECTED!';
       flashTimer = 50;
+      playSound('key');
     }
   });
 

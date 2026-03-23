@@ -108,7 +108,10 @@ function updateEnemies() {
       triggerDamageFlash();
     }
 
-    if (player.hp <= 0) gameState = 'dead';
+    if (player.hp <= 0 && gameState !== 'dead') {
+      gameState = 'dead';
+      playSound('playerDie');
+    }
 
     // Unstuck — push out of walls
     const R = 0.35;
@@ -177,7 +180,10 @@ function updateBoss() {
     damageFlashTimer = 18;
     screenShake = 8;
   }
-  if (player.hp <= 0) gameState = 'dead';
+  if (player.hp <= 0 && gameState !== 'dead' ) {
+    gameState = 'dead';
+    playSound('playerDie');
+  }
   if (boss.flashTimer > 0) boss.flashTimer--;
 }
 
@@ -283,5 +289,6 @@ function checkExit() {
   const ex = LEVELS[currentLevel].exit;
   if (Math.sqrt((ex.x - player.x)**2 + (ex.y - player.y)**2 ) < 1.0 ){
     gameState = 'win';
+    playSound('win');
   }
 }
