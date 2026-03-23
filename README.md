@@ -40,6 +40,7 @@ A browser-based first-person 3D dungeon survival shooter built with pure HTML, C
 | Level 5    | The Abyss     | 5    | 6 HP     | Near black walls — hardest dungeon         |
 | Boss Arena | The Arena     | 0    | 30 HP    | Dark teal — Final Boss fight               |
 +------------+---------------+------+----------+--------------------------------------------+
+
 ---
 
 ## 👹 Final Boss
