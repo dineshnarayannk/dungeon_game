@@ -8,14 +8,16 @@ A browser-based first-person 3D dungeon survival shooter built with pure HTML, C
 
 ### Controls
 
-| Key | Action |
-|-----|--------|
-| `W` or `Arrow Up` | Move forward |
-| `S` or `Arrow Down` | Move backward |
-| `A` or `Arrow Left` | Turn left |
-| `D` or `Arrow Right` | Turn right |
-| `SPACE` | Shoot |
-| `R` | Restart game |
++----------------------+----------------+
+| Key                  | Action         |
++----------------------+----------------+
+| `W` or `Arrow Up`    | Move forward   |
+| `S` or `Arrow Down`  | Move backward  |
+| `A` or `Arrow Left`  | Turn left      |
+| `D` or `Arrow Right` | Turn right     |
+| `SPACE`              | Shoot          |
+| `R`                  | Restart game   |
++----------------------+----------------+
 
 ### Objective
 
@@ -80,11 +82,13 @@ After escaping Level 5 the player enters the **Boss Arena** — a closed room wi
 
 Three layered visual effects when the player takes damage:
 
-| Effect | Triggers When |
-|--------|--------------|
++------------------------+-------------------------+
+| Effect                 | Triggers When           |
+|------------------------+-------------------------+
 | Sharp red screen flash | Every hit from an enemy |
-| Pulsing red overlay | HP drops below 50 |
-| Red vignette border | HP drops below 75 |
+| Pulsing red overlay    | HP drops below 50       |
+| Red vignette border    | HP drops below 75       |
++------------------------+-------------------------+
 
 ---
 
@@ -150,11 +154,13 @@ This is the same technique used in **Wolfenstein 3D (1992)** and **Doom (1993)**
 
 ## 🛠️ Built With
 
-| Technology | Purpose |
-|------------|---------|
-| HTML5 Canvas | Rendering the entire 3D scene |
-| Vanilla JavaScript | Raycasting engine, game logic, AI |
-| CSS3 | Full screen layout, HUD styling |
++---------------------+-------------------------------------+
+| Technology          | Purpose                             |
++---------------------+-------------------------------------+
+| HTML5 Canvas        | Rendering the entire 3D scene       |
+| Vanilla JavaScript  | Raycasting engine, game logic, AI   |
+| CSS3                | Full screen layout, HUD styling     |
++---------------------+-------------------------------------+
 
 No libraries. No frameworks. No build tools. Just open and play.
 
