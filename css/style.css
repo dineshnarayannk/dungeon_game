@@ -97,3 +97,31 @@ body {
   color: #4a4a4a;
   margin-left: auto;
 }
+
+#pause-wrap {
+  position:absolute;
+  top:36px;
+  left:10px;
+  z-index: 10;
+}
+
+#pause-btn {
+  background: rgba(20,20,40,0.85);
+  color: #7c6fff;
+  border: 2px solid #7c6fff;
+  border-radius: 8px;
+  padding: 4px 12px;
+  font-size: 18px;
+  cursor: pointer;
+  font-family: monospace;
+  transition: background 0.2s;
+}
+
+#pause-btn:hover {
+  background: #7c6fff;
+  color:#fff;
+}
+
+#pause-btn.hidden {
+  display: none;
+}

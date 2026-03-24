@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dungeon 3D</title>
   <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="data:,">
 </head>
 <body>
   <div id="wrap">
@@ -24,6 +25,10 @@
       </div>
     </div>
 
+    <div id="pause-wrap">
+      <button id="pause-btn" onclick="togglePause()">⏸</button>
+    </div>
+
     <canvas id="gamecanvas"></canvas>
 
     <div id="bot-bar">
@@ -31,7 +36,6 @@
       <div class="key-badge"><b>Arrow Keys</b> look</div>
       <div class="key-badge"><b>R</b> restart</div>
       <div class="key-badge"><b>SPACE</b> shoot</div>
-      <div id="msg">Collect 3 keys then reach the exit!</div>
     </div>
 
   </div>

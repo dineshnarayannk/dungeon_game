@@ -14,6 +14,8 @@ const RAYS      = 160;
 const STEP      = FOV / RAYS;
 const MAX_DEPTH = 16;
 
+const zBuffer = new Array(RAYS).fill(0);
+
 function castRay(angle) {
   let sin = Math.sin(angle);
   let cos = Math.cos(angle);
@@ -54,5 +56,8 @@ function drawScene() {
     let b = Math.floor(base[2] * bright);
     ctx.fillStyle = `rgb(${r},${g},${b})`;
     ctx.fillRect(i * sliceW, HALF - wallH / 2, sliceW + 1, wallH);
+
+    // Store corrected wall distance for this column
+    zBuffer[i] = corr ;
   }
 }

@@ -42,7 +42,8 @@ function worldToScreen(wx, wy) {
   if (Math.abs(relAngle) > FOV * 0.75) return null;
   let sx   = W / 2 + relAngle * (W / FOV);
   let size = Math.min(200, Math.max(30, H / dist));
-  return { sx, size, dist };
+  let column = Math.floor((sx/W) * RAYS) ;
+  return { sx, size, dist, column };
 }
 
 function drawSprites() {
@@ -57,11 +58,15 @@ function drawSprites() {
     return db - da;
   });
 
-  all.forEach(s => {
+  all.forEach(s => {  
     let proj = worldToScreen(s.x, s.y);
     if (!proj) return;
-    let { sx, size, dist } = proj;
+    let { sx, size, dist, column } = proj;
     if (dist > MAX_DEPTH) return;
+
+    // Check zBuffer - only draw if sprite is in front of wall
+    if (column >= 0 && column < RAYS && dist >= zBuffer[column]) return ;
+
     let bright = Math.max(0.3, 1 - dist / MAX_DEPTH);
     ctx.globalAlpha = bright;
 

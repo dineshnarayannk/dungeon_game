@@ -13,6 +13,9 @@ let damageFlashTimer = 0;
 let spawnInterval   = null;
 let levelTransTimer = 0;
 let levelTransMsg   = '';
+let isPaused = false;
+let countdownTimer = 0;
+let countdownValue = 3;
 
 // ── LOAD LEVEL ────────────────────────────────────────────────
 function loadLevel(idx) {
@@ -68,6 +71,40 @@ function initGame() {
   player.angle = 0;
   gameState    = 'playing';
   loadLevel(0);
+  document.getElementById('pause-btn').classList.remove('hidden');
+}
+
+function togglePause() {
+  if (gameState !== 'playing' && gameState !== 'paused') return ;
+  if (gameState === 'playing') {
+    gameState = 'paused';
+    isPaused = true;
+    document.getElementById('pause-btn').textContent = '▶';
+  } else if (gameState === 'paused') {
+    startResume();
+  }
+}
+
+function startResume() {
+  gameState = 'countdown';
+  countdownValue = 3;
+  countdownTimer = 60;
+}
+
+function resumeGame() {
+  gameState = 'playing' ;
+  isPaused = false ;
+  document.getElementById('pause-btn').textContent = '⏸';
+}
+
+function goMainMenu() {
+  if (spawnInterval) clearInterval(spawnInterval);
+  gameState = 'start';
+  isPaused = false;
+  gameStarted = false;
+  document.getElementById('pause-btn').textContent = '⏸';
+  document.getElementById('level-title').textContent = 'DUNGEON 3D';
+  document.getElementById('pause-btn').classList.add('hidden');
 }
 
 // ── SHOOT ─────────────────────────────────────────────────────
@@ -518,6 +555,7 @@ function drawHUD() {
 
   // Start screen
   if (gameState === 'start') {
+    document.getElementById('pause-btn').classList.add('hidden'); 
     ctx.fillStyle = 'rgba(0,0,0,0.93)';
     ctx.fillRect(0, 0, W, H);
 
@@ -556,6 +594,123 @@ function drawHUD() {
   }
 }
 
+function drawPauseScreen() {
+  if (gameState !== 'paused') return ;
+
+  // Dark overlay
+  ctx.fillStyle = 'rgba(0,0,0,0.75)';
+  ctx.fillRect(0,0,W,H);
+
+  // Panel Background 
+  let pw = 400, ph = 320;
+  let px = W/2 - pw / 2 , py = H/2 - ph/2;
+  ctx.fillStyle = 'rgba(15,15,30,0.97)';
+  ctx.beginPath();
+  ctx.roundRect(px,py,pw,ph,16);
+  ctx.fill();
+  ctx.strokeStyle = '#7c6fff';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.roundRect(px,py,pw,ph,16);
+  ctx.stroke();
+
+  // Pause title
+  ctx.fillStyle = '#ffffff';
+  ctx.font = 'bold 32px monospace';
+  ctx.textAlign = 'center' ;
+  ctx.fillText('⏸ PAUSED', W/2, py + 55);
+
+  // Level and score info
+  ctx.fillStyle = '#555';
+  ctx.font = '13px monospace';
+  ctx.fillText(
+    'Level ' + (currentLevel + 1) + '  —  ' + LEVELS[currentLevel].name,
+    W/2 , py + 85 
+  );
+  ctx.fillStyle = '#444';
+  ctx.fillText('Score: ' + score + '  Kills: ' + kills,W/2, py + 105);
+
+  // Resume button 
+  let rbx = W/2 - 90, rby = py + 125, rbw = 180 , rbh = 56 ;
+  ctx.fillStyle = '#27ae60';
+  ctx.beginPath();
+  ctx.roundRect(rbx,rby,rbw,rbh,12);
+  ctx.fill() ;
+  ctx.strokeStyle = '#2ecc71' ;
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.roundRect(rbx,rby,rbw,rbh,12);
+  ctx.stroke();
+  ctx.fillStyle = '#ffffff';
+  ctx.font = 'bold 20px monospace';
+  ctx.fillText('▶ RESUME',W/2, rby + 36);
+
+  // RESTART button 
+  let resbx = px + 30, resby = py + 210, resbw = 155, resbh = 52 ;
+  ctx.fillStyle = '#c0392b';
+  ctx.beginPath();
+  ctx.roundRect(resbx,resby,resbw,resbh,12);
+  ctx.fill();
+  ctx.strokeStyle = '#e74c3c';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.roundRect(resbx,resby,resbw,resbh,12);
+  ctx.stroke();
+  ctx.fillStyle = '#ffffff';
+  ctx.font = 'bold 16px monospace';
+  ctx.fillText('↺  RESTART',resbx + resbw /2 , resby + 32);
+
+  // MAIN MENU button
+  let mmbx = px + pw - 185, mmby = py + 210, mmbw = 155 , mmbh = 52 ;
+  ctx.fillStyle = '#2980b9';
+  ctx.beginPath();
+  ctx.roundRect(mmbx,mmby,mmbw,mmbh,12);
+  ctx.fill();
+  ctx.strokeStyle = '#3498db';
+  ctx.lineWidth = 2;
+  ctx.beginPath() ;
+  ctx.roundRect(mmbx,mmby,mmbw,mmbh,12);
+  ctx.stroke();
+  ctx.fillStyle = '#ffffff';
+  ctx.font = 'bold 16px monospace' ;
+  ctx.fillText('⌂  MAIN MENU',mmbx + mmbw / 2, mmby + 32);
+
+  ctx.textAlign = 'left';
+
+  // Store button 
+  window._pauseBtns = {
+    resume: { x:rbx, y:rby, w:rbw, h:rbh },
+    restart: { x:resbx, y:resby, w:resbw, h:resbh },
+    mainmenu: { x:mmbx, y:mmby, w:mmbw, h:mmbh },
+  };
+}
+
+function drawCountdown() {
+  if (gameState !== 'countdown') return ;
+  ctx.fillStyle = 'rgba(0,0,0,0.55)';
+  ctx.fillRect(0,0,W,H);
+
+  let alpha = Math.min(1,countdownTimer / 20);
+  let scale = 1 + (1 - countdownTimer / 60) * 0.5;
+
+  ctx.save() ;
+  ctx.translate(W/2,H/2);
+  ctx.scale(scale,scale);
+  ctx.fillStyle = `rgba(255,255,255,${alpha})`;
+  ctx.font = 'bold 120px monospace' ;
+  ctx.textAlign = 'center' ;
+  ctx.textBaseline = 'middle' ;
+  ctx.fillText(countdownValue, 0, 0);
+  ctx.restore();
+
+  ctx.fillStyle = 'rgba(255,255,255,0.4)';
+  ctx.font = '18px monospace' ;
+  ctx.textAlign = 'center' ;
+  ctx.textBaseline = 'alphabetic' ;
+  ctx.fillText('Get Ready...', W/2, H/2 + 80 );
+  ctx.textAlign = 'left';
+}
+
 // ── UPDATE HTML HUD ───────────────────────────────────────────
 function updateHUD() {
   document.getElementById('hp-val').textContent    = Math.max(0, Math.floor(player.hp));
@@ -569,8 +724,52 @@ function updateHUD() {
   document.getElementById('lvl-val').textContent   = currentLevel + 1;
 }
 
+canvas.addEventListener('click', e => {
+  if (gameState !== 'paused') return;
+  if (!window._pauseBtns) return;
+
+  const rect = canvas.getBoundingClientRect();
+  const scaleX = canvas.width / rect.width;
+  const scaleY = canvas.height / rect.height;
+  const mx = (e.clientX - rect.left) * scaleX ;
+  const my = (e.clientY - rect.top) * scaleY;
+
+  const btns = window._pauseBtns;
+
+  // Resume button 
+  if (mx > btns.resume.x && mx < btns.resume.x + btns.resume.w && my > btns.resume.y && my < btns.resume.y + btns.resume.h) {
+    startResume() ;
+    return;
+  }
+
+  // Restart button
+  if (mx > btns.restart.x && mx < btns.restart.x + btns.restart.w && 
+      my > btns.restart.y && my < btns.restart.y + btns.restart.h) {
+    isPaused = false ;
+    document.getElementById('pause-btn').textContent = '⏸';
+    initGame();
+    return;
+  }
+
+  // Main Menu button
+  if (mx > btns.mainmenu.x && mx < btns.mainmenu.x + btns.mainmenu.w && my > btns.mainmenu.y && my < btns.mainmenu.y + btns.mainmenu.h) {
+    goMainMenu();
+    return;
+  }
+})
+
 // ── MAIN LOOP ─────────────────────────────────────────────────
 function loop() {
+  // Hide pause button on start screen 
+  const pauseBtn = document.getElementById('pause-btn') ;
+  if (pauseBtn) {
+    if (gameState === 'start') {
+      pauseBtn.classList.add('hidden');
+    } else {
+      pauseBtn.classList.remove('hidden');
+    }
+  }
+  
   handleInput();
   if (gameState === 'playing') {
     updateEnemies();
@@ -579,6 +778,18 @@ function loop() {
       updateBoss();
       checkExit();
       if (introTimer > 0) introTimer--;
+    }
+  }
+  // Countdown logic
+  if (gameState === 'countdown') {
+    countdownTimer--;
+    if(countdownTimer <= 0){
+      countdownValue--;
+      if (countdownValue <= 0) {
+        resumeGame();
+      } else {
+        countdownTimer = 60;
+      }
     }
   }
   drawScene();
@@ -595,6 +806,8 @@ function loop() {
     drawGun();
   }
   drawHUD();
+  drawPauseScreen();
+  drawCountdown();
   if (gameState !== 'start') drawMinimap();
   updateHUD();
   requestAnimationFrame(loop);

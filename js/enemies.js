@@ -41,8 +41,11 @@ function drawEnemies() {
     if (!e.alive) return;
     let proj = worldToScreen(e.x, e.y);
     if (!proj) return;
-    let { sx, size, dist } = proj;
+    let { sx, size, dist, column } = proj;
     if (dist > MAX_DEPTH) return;
+    
+    // Only draw if enemy is in front of wall
+    if (column >= 0 && column < RAYS && dist >= zBuffer[column]) return ;
 
     let bright   = Math.max(0.2, 1 - dist / MAX_DEPTH);
     let flashing = e.flashTimer > 0;
@@ -191,8 +194,17 @@ function drawBoss() {
   if (!boss.alive) return;
   let proj = worldToScreen(boss.x , boss.y);
   if (!proj) return ;
-  let { sx, size, dist } = proj;
+  let { sx, size } = proj;
+
+  // Calculate dist manually for zBuffer check
+  let dx = boss.x - player.x ;
+  let dy = boss.y - player.y;
+  let dist = Math.sqrt(dx * dx + dy * dy);
+  let column = Math.floor(((W/2 + (Math.atan2(dy,dx) - player.angle) * (W/FOV)) / W ) * RAYS);
+
   if (dist > MAX_DEPTH) return ;
+  if (column >= 0 && column < RAYS && dist >= zBuffer[column]) return;
+
   let br = Math.max(0.3, 1 - dist / MAX_DEPTH);
   let f1 = boss.flashTimer > 0;
   let phase2 = boss.hp / boss.maxHp < 0.5;

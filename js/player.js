@@ -17,12 +17,16 @@ document.addEventListener('keydown', e => {
     if (gameState === 'start') {
       gameStarted = true;
       initGame();
-    } else {
+      // loop();  
+    } else if (gameState === 'playing') {
       shoot();
+    } else if (gameState === 'paused') {
+      startResume();
     }
   }
   if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key))
     e.preventDefault();
+  if (e.key === 'Escape') togglePause() ;
 });
 
 document.addEventListener('keyup', e => {
