@@ -29,6 +29,7 @@ function initSprites() {
   collectedKeys = 0;
   flashTimer    = 0;
   flashMsg      = '';
+  exitVisible   = false;
 }
 
 function worldToScreen(wx, wy) {
@@ -125,20 +126,23 @@ function collectItems() {
   // Check exit
   const lv = LEVELS[currentLevel];
   const ex = lv.exit;
-  if (
-    collectedKeys >= lv.keysNeeded &&
-    Math.sqrt((ex.x - player.x) ** 2 + (ex.y - player.y) ** 2) < 0.8
-  ) {
+
+  // Show exit gate only after all keys collected
+  if (currentLevel !== LEVELS.length - 1 && collectedKeys >= lv.keysNeeded && kills >= lv.killsNeeded && !exitVisible) {
+    exitVisible = true ;
+    killFeed.unshift({msg: 'EXIT GATE UNLOCKED!', timer: 90});
+  }
+
+  // Check if player reached exit
+  if (exitVisible && Math.sqrt((ex.x - player.x)**2 + (ex.y - player.y)**2) < 0.8) {
     if (currentLevel < LEVELS.length - 2){
-      // Normal level complete - go to next level
       gameState = 'levelcomplete';
       levelTransTimer = 180;
       levelTransMsg = 'LEVEL ' + (currentLevel + 1) + ' COMPLETE!';
-    } else if (currentLevel === LEVELS.length - 2) {
-      // Level 5 complete - go to boss arena
+    } else if (currentLevel === LEVELS.length - 2){
       gameState = 'levelcomplete';
       levelTransTimer = 180;
-      levelTransMsg = 'LEVEL 5 COMPLETE ! FINAL BOSS AWAITS...';
+      levelTransMsg = 'LEVEL 5 COMPLETE! FINAL BOSS AWAITS...';
     }
   }
 }

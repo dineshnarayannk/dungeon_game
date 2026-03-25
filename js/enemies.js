@@ -272,26 +272,38 @@ function drawBossHPBar() {
 }
 
 function drawExit() {
-  if (!exitVisible) return ;
-  let proj = worldToScreen(
-    LEVELS[currentLevel].exit.x,
-    LEVELS[currentLevel].exit.y
-  );
-  if (!proj) return ;
-  let { sx , size , dist } = proj;
-  if ( dist > MAX_DEPTH) return;
+  if (!exitVisible) return;
 
+  const exPos = LEVELS[currentLevel].exit;
+  let dx = exPos.x - player.x ;
+  let dy = exPos.y - player.y;
+  let exDist = Math.sqrt(dx * dx + dy * dy);
+
+  let proj = worldToScreen(exPos.x , exPos.y);
+  if (!proj) return ;
+
+  let { sx , size , dist , column } = proj ;
+  if (exDist > MAX_DEPTH) return;
+
+  // zBuffer check - dont show through walls
+  if (column >= 0 && column < RAYS && exDist >= zBuffer[column]) return ;
+  
   let pulse = 0.7 + 0.3 * Math.sin(Date.now() * 0.005);
-  ctx.globalAlpha = Math.max(0.4, 1 - dist / MAX_DEPTH) * pulse ;
-  // Gate Frame 
-  ctx.fillStyle  = '#FFD700';
-  ctx.fillRect(sx - size*0.25, HALF - size*0.6, size*0.5, size*0.65);
-  // Gate inner
+  ctx.globalAlpha = Math.max(0.4,1 - exDist/ MAX_DEPTH) * pulse;
+
+  // Gate frame -- golden 
+  ctx.fillStyle = '#FFD700';
+  ctx.fillRect(sx - size*0.25, HALF - size*0.6,size*0.5,size*0.65);
+
+  // Gate inner - green
   ctx.fillStyle = '#00FF88';
-  ctx.fillRect(sx - size*0.18, HALF - size*0.52, size*0.36, size*0.5);
+  ctx.fillRect(sx - size*0.18, HALF - size*0.52, size*0.36,size*0.5);
+
   // Glow 
-  ctx.fillStyle = `rgba(255,215,0,${0.15*pulse})`;
-  ctx.beginPath(); ctx.arc(sx, HALF - size*0.3, size*0.6, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle = `rgba(255,215,0,${0.15 * pulse})` ;
+  ctx.beginPath();
+  ctx.arc(sx , HALF - size*0.3, size*0.6, 0, Math.PI*2);
+  ctx.fill();
 
   ctx.globalAlpha = 1;
 }

@@ -43,6 +43,7 @@ function loadLevel(idx) {
   enemies      = [];
   particles    = [];
   killFeed     = [];
+  kills        = 0;
 
   initSprites();
 
@@ -281,11 +282,11 @@ function drawMinimap() {
   }
 
   // Exit dot
-  if (currentLevel !== LEVELS.length - 1){
+  if (currentLevel !== LEVELS.length - 1 && exitVisible) {
     const exPos = LEVELS[currentLevel].exit;
     ctx.fillStyle = '#FFD700';
     ctx.beginPath();
-    ctx.arc(ox + exPos.x * ms, oy + exPos.y * ms, 3, 0, Math.PI * 2);
+    ctx.arc(ox + exPos.x * ms, oy + exPos.y * ms, 3, 0, Math.PI*2);
     ctx.fill();
   }
 
@@ -417,6 +418,51 @@ function drawHUD() {
   ctx.beginPath(); ctx.moveTo(W/2-14, HALF); ctx.lineTo(W/2+14, HALF); ctx.stroke();
   ctx.beginPath(); ctx.arc(W/2, HALF, 6, 0, Math.PI*2); ctx.stroke();
 
+  if (gameState === 'playing' && currentLevel !== LEVELS.length - 1) {
+    const lv      = LEVELS[currentLevel];
+    let keysLeft  = Math.max(0, lv.keysNeeded  - collectedKeys);
+    let killsLeft = Math.max(0, lv.killsNeeded - kills);
+    let keysOk    = collectedKeys >= lv.keysNeeded;
+    let killsOk   = kills >= lv.killsNeeded;
+
+    // Background pill — wider and centered properly
+    let barW = 420;
+    let barX = W/2 - barW/2;
+    let barY = H - 92;
+
+    ctx.fillStyle = 'rgba(0,0,0,0.65)';
+    ctx.beginPath();
+    ctx.roundRect(barX, barY, barW, 38, 8);
+    ctx.fill();
+
+    ctx.font      = 'bold 14px monospace';
+    ctx.textAlign = 'center';
+
+    // Keys — left side
+    if (keysOk) {
+      ctx.fillStyle = '#2ecc71';
+      ctx.fillText('KEYS  ' + collectedKeys + '/' + lv.keysNeeded + '  ✓', barX + barW * 0.28, barY + 25);
+    } else {
+      ctx.fillStyle = '#e8b84b';
+      ctx.fillText('KEYS  ' + collectedKeys + '/' + lv.keysNeeded, barX + barW * 0.28, barY + 25);
+    }
+
+    // Divider line — center
+    ctx.fillStyle = '#444';
+    ctx.fillRect(W/2 - 1, barY + 6, 2, 26);
+
+    // Kills — right side
+    if (killsOk) {
+      ctx.fillStyle = '#2ecc71';
+      ctx.fillText('KILLS  ' + kills + '/' + lv.killsNeeded + '  ✓', barX + barW * 0.72, barY + 25);
+    } else {
+      ctx.fillStyle = '#e74c3c';
+      ctx.fillText('KILLS  ' + kills + '/' + lv.killsNeeded, barX + barW * 0.72, barY + 25);
+    }
+
+    ctx.textAlign = 'left';
+  }
+
   // Kill feed
   killFeed = killFeed.filter(k => k.timer > 0);
   killFeed.forEach((k, i) => {
@@ -437,7 +483,7 @@ function drawHUD() {
     ctx.fillText('LEVEL ' + (currentLevel + 1) + '  —  ' + lv.name, W / 2, H / 2 - 40);
     ctx.fillStyle = `rgba(200,200,200,${alpha})`;
     ctx.font      = 'bold 20px monospace';
-    ctx.fillText('Find ' + lv.keysNeeded + ' keys and reach the exit!', W / 2, H / 2 + 10);
+    ctx.fillText( 'Find ' + lv.keysNeeded + ' keys   +   Kills ' + lv.killsNeeded + ' enemies', W/2 , H/2 + 10) ;
     ctx.textAlign = 'left';
     waveTimer--;
   }
@@ -507,11 +553,20 @@ function drawHUD() {
   }
 
   // Exit open hint
-  if (currentLevel == LEVELS.length - 1 && exitVisible) {
+  if (exitVisible && currentLevel !== LEVELS.length - 1){
     let pulse = 0.6 + 0.4 * Math.sin(Date.now() * 0.004);
     ctx.fillStyle = `rgba(0,255,136,${pulse})`;
-    ctx.font = 'bold 16px monospace'; ctx.textAlign = 'center' ;
-    ctx.fillText('EXIT GATE OPEN - REACH IT TO WIN!',W/2,H - 55);
+    ctx.font = 'bold 16px monospace';
+    ctx.textAlign = 'center' ;
+    ctx.fillText('EXIT GATE UNLOCKED — REACH IT!',W/2,H - 35);
+    ctx.textAlign = 'left';
+  }
+  if (exitVisible && currentLevel === LEVELS.length - 1){
+    let pulse = 0.6 + 0.4 * Math.sin(Date.now() * 0.004);
+    ctx.fillStyle = `rgba(0,255,136,${pulse})`;
+    ctx.font = 'bold 16px monospace';
+    ctx.textAlign = 'center' ;
+    ctx.fillText('EXIT GATE OPEN —  REACH IT TO WIN!',W/2, H - 55);
     ctx.textAlign = 'left';
   }
 
@@ -722,6 +777,25 @@ function updateHUD() {
   document.getElementById('ammo-val').textContent  = ammo;
   document.getElementById('wave-val').textContent  = wave;
   document.getElementById('lvl-val').textContent   = currentLevel + 1;
+
+  if (gameState === 'playing' && currentLevel !== LEVELS.length - 1){
+    const lv = LEVELS[currentLevel];
+    let keysOk = collectedKeys >= lv.keysNeeded;
+    let killsOk = kills >= lv.killsNeeded;
+    const msg = document.getElementById('msg');
+    if (!msg) return; 
+    if (!exitVisible) {
+      if (!keysOk && !killsOk) {
+        msg.textContent = 'Collect  ' + lv.keysNeeded + ' keys  +  Kill ' + lv.killsNeeded + ' enemies to open the gate!';
+      } else if ( !keysOk) {
+        msg.textContent = 'Need ' + (lv.keysNeeded - colllectedKeys) + ' more keys to open the gate!' ;
+      } else if (!killsOk) {
+        msg.textContent = 'Kills ' + (lv.killsNeeded - kills) +  ' more enemies to open the gate!';
+      }
+    } else {
+      msg.textContent = 'Gate is open — reach the exit!' ;
+    }
+  }
 }
 
 canvas.addEventListener('click', e => {
@@ -795,16 +869,13 @@ function loop() {
   drawScene();
   drawSprites();
   drawEnemies();
+  drawExit();
   if (currentLevel === LEVELS.length - 1){
-    drawExit();
     drawBoss();
-    drawParticles();
-    drawGun();
     drawBossHPBar();
-  } else {
-    drawParticles();
-    drawGun();
   }
+  drawParticles();
+  drawGun();
   drawHUD();
   drawPauseScreen();
   drawCountdown();
