@@ -79,6 +79,7 @@ function togglePause() {
   if (gameState !== 'playing' && gameState !== 'paused') return ;
   if (gameState === 'playing') {
     gameState = 'paused';
+    document.exitPointerLock();
     isPaused = true;
     document.getElementById('pause-btn').textContent = '▶';
   } else if (gameState === 'paused') {
@@ -798,39 +799,58 @@ function updateHUD() {
   }
 }
 
-canvas.addEventListener('click', e => {
-  if (gameState !== 'paused') return;
-  if (!window._pauseBtns) return;
+canvas.addEventListener('mousedown', e => {
+  if (e.button !== 0) return; 
 
-  const rect = canvas.getBoundingClientRect();
-  const scaleX = canvas.width / rect.width;
-  const scaleY = canvas.height / rect.height;
-  const mx = (e.clientX - rect.left) * scaleX ;
-  const my = (e.clientY - rect.top) * scaleY;
-
-  const btns = window._pauseBtns;
-
-  // Resume button 
-  if (mx > btns.resume.x && mx < btns.resume.x + btns.resume.w && my > btns.resume.y && my < btns.resume.y + btns.resume.h) {
-    startResume() ;
-    return;
-  }
-
-  // Restart button
-  if (mx > btns.restart.x && mx < btns.restart.x + btns.restart.w && 
-      my > btns.restart.y && my < btns.restart.y + btns.restart.h) {
-    isPaused = false ;
-    document.getElementById('pause-btn').textContent = '⏸';
+  if (gameState === 'start') {
+    gameStarted = true;
     initGame();
     return;
   }
 
-  // Main Menu button
-  if (mx > btns.mainmenu.x && mx < btns.mainmenu.x + btns.mainmenu.w && my > btns.mainmenu.y && my < btns.mainmenu.y + btns.mainmenu.h) {
-    goMainMenu();
+  if (gameState === 'playing') {
+    canvas.requestPointerLock();
+    shoot();
     return;
   }
-})
+
+  if (gameState === 'paused') {
+    if (!window._pauseBtns) return;
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width ;
+    const scaleY = canvas.height / rect.height;
+    const mx = (e.clientX - rect.left) * scaleX;
+    const my = (e.clientY - rect.top) * scaleY;
+    const btns = window._pauseBtns;
+
+    if (mx > btns.resume.x && mx < btns.resume.x + btns.resume.w &&
+        my > btns.resume.y && my < btns.resume.y + btns.resume.h) {
+      startResume(); return;
+    }
+    if (mx > btns.restart.x && mx < btns.restart.x + btns.restart.w && 
+        my >  bts.restart.y && my < btns.restart.y + btns.restart.h) {
+      isPaused = false ;
+      document.getElementById('pause-btn').textContent = '⏸';
+      initGame(); return;
+    }
+    if (mx > btns.mainmenu.x && mx < btns.mainmenu.x + btns.mainmenu.w &&
+        my > btns.mainmenu.x && mx < btns.mainmenu.y + btns.mainmenu.h) {
+      goMainMenu(); return;
+    }
+  }
+});
+
+canvas.addEventListener('mousemove', e => {
+  if (gameState !== 'playing') return;
+  player.angle += e.movementX * 0.002;
+}); 
+
+canvas.addEventListener('contextMenu', e => {
+  e.preventDefault();
+});
+
+
+
 
 // ── MAIN LOOP ─────────────────────────────────────────────────
 function loop() {

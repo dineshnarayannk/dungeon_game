@@ -26,7 +26,10 @@ document.addEventListener('keydown', e => {
   }
   if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key))
     e.preventDefault();
-  if (e.key === 'Escape') togglePause() ;
+  if (e.key === 'Escape') {
+    togglePause();
+    document.exitPointerLock();
+  }
 });
 
 document.addEventListener('keyup', e => {
