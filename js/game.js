@@ -100,13 +100,32 @@ function resumeGame() {
 }
 
 function goMainMenu() {
-  if (spawnInterval) clearInterval(spawnInterval);
+  if (spawnInterval) {
+    clearInterval(spawnInterval);
+    spawnInterval = null;
+  }
   gameState = 'start';
   isPaused = false;
   gameStarted = false;
-  document.getElementById('pause-btn').textContent = '⏸';
-  document.getElementById('level-title').textContent = 'DUNGEON 3D';
-  document.getElementById('pause-btn').classList.add('hidden');
+  currentLevel = 0;
+  kills = 0;
+  enemies = [];
+  particles = [];
+  killFeed = [];
+  exitVisible = false;
+  damageFlashTimer = 0;
+  waveTimer = 0;
+
+  document.exitPointerLock();
+
+  const pb = document.getElementById('pause-btn');
+  if (pb) { pb.textContent = '⏸'; pb.classList.add('hidden'); }
+
+  const lt = document.getElementById('level-title');
+  if (lt) lt.textContent = 'DUNGEON 3D';
+
+  const msg = document.getElementById('msg');
+  if (msg) msg.textContent = 'Collect required Keys and Kill required Enemies to reach the exit gate!';
 }
 
 // ── SHOOT ─────────────────────────────────────────────────────
@@ -815,6 +834,7 @@ canvas.addEventListener('mousedown', e => {
   }
 
   if (gameState === 'paused') {
+    document.exitPointerLock();
     if (!window._pauseBtns) return;
     const rect = canvas.getBoundingClientRect();
     const scaleX = canvas.width / rect.width ;
@@ -828,13 +848,13 @@ canvas.addEventListener('mousedown', e => {
       startResume(); return;
     }
     if (mx > btns.restart.x && mx < btns.restart.x + btns.restart.w && 
-        my >  bts.restart.y && my < btns.restart.y + btns.restart.h) {
+        my >  btns.restart.y && my < btns.restart.y + btns.restart.h) {
       isPaused = false ;
       document.getElementById('pause-btn').textContent = '⏸';
       initGame(); return;
     }
     if (mx > btns.mainmenu.x && mx < btns.mainmenu.x + btns.mainmenu.w &&
-        my > btns.mainmenu.x && mx < btns.mainmenu.y + btns.mainmenu.h) {
+        my > btns.mainmenu.y && my < btns.mainmenu.y + btns.mainmenu.h) {
       goMainMenu(); return;
     }
   }
@@ -849,7 +869,34 @@ canvas.addEventListener('contextMenu', e => {
   e.preventDefault();
 });
 
+canvas.addEventListener('mousemove', e => {
+  if (gameState !== 'playing') {
+    if (gameState === 'paused' && window._pauseBtns) {
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      const mx = (e.clientX - rect.left) * scaleX ;
+      const my = (e.clientY - rect.top) * scaleY;
+      const btns = window._pauseBtns;
 
+      let hovering = 
+        (mx > btns.resume.x && mx < btns.resume.x + btns.resume.w && 
+         my > btns.resume.y && mx < btns.resume.y + btns.resume.h) ||
+        (mx > btns.restart.x && mx < btns.restart.x + btns.restart.w &&
+         my > btns.restart.y && my < btns.restart.y + btns.restart.h) ||
+        (mx > btns.mainmenu.x && mx < btns.mainmenu.x + btns.mainmenu.w &&
+         my > btns.mainmenu.y && my < btns.mainmenu.y + btns.mainmenu.h);
+      
+      canvas.style.cursor = hovering ? 'pointer' : 'default';
+    } else {
+      canvas.style.cursor = 'default';
+    }
+    return;
+  }
+  // During gameplay - turn player with mouse
+  player.angle += e.movementX * 0.002;
+  canvas.style.cursor = 'crosshair';
+})
 
 
 // ── MAIN LOOP ─────────────────────────────────────────────────
