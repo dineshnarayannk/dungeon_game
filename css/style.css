@@ -125,3 +125,80 @@ body {
 #pause-btn.hidden {
   display: none;
 }
+
+#powerups{
+  position: absolute;
+  top: 100px;
+  left: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 10;
+}
+
+.power-btn{
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: 3px solid rgba(255,255,255,0.3);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  position: relative;
+  transition: transform 0.15s, border-color 0.2s;
+  box-shadow: 0 0 12px rgba(0,0,0,0.5);
+  user-select: none;
+}
+
+.power-btn:hover{
+  transform: scale(1.12);
+  border-color: rgba(255,255,255,0.8);
+}
+
+.power-btn:active{
+  transform: scale(0.95);
+}
+
+.power-btn.empty{
+  opacity: 0.35;
+  cursor: not-allowed;
+  filter: grayscale(1);
+}
+
+.power-btn.count {
+  position: absolute;
+  bottom: -4px;
+  right: -4px;
+  background: #111;
+  color: #fff;
+  font-size: 11px;
+  font-weight: bold;
+  font-family: monospace;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #444;
+}
+
+#health-btn { background: radial-gradient(circle at 35% 35%, #e74c3c, #7b1a1a); }
+#ammo-btn { background: radial-gradient(circle at 35% 35%, #e8b84b, #7a5a00); }
+#shield-btn {background: radial-gradient(circle at 35% 35%, #3498db, #0a3a6a); }
+
+#shield-btn.active {
+  border-color: #00bfff;
+  box-shadow: 0 0 18px #00bfff, 0 0 6px #fff;
+  animation: shieldPulse 1s infinite alternate;
+}
+
+@keyframes shieldPulse {
+  from { box-shadow: 0 0 10px #00bfff; }
+  to { box-shadow: 0 0 24px #00bfff, 0 0 8px #fff; }
+}
+
+#powerups.hidden { display: none ; }

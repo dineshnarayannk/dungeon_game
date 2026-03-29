@@ -6,31 +6,97 @@ let flashTimer = 0;
 let flashMsg   = '';
 
 function initSprites() {
-  // Load keys from current level definition
-  keys_items = LEVELS[currentLevel].keys.map(k => ({
-    x:     k.x,
-    y:     k.y,
-    color: k.color,
-    alive: true,
-  }));
 
-  // Coins scattered around the dungeon
-  coins = currentLevel === LEVELS.length - 1 ? [] : [
-    { x:3.5,  y:2.5,  alive:true },
-    { x:7.5,  y:1.5,  alive:true },
-    { x:2.5,  y:7.5,  alive:true },
-    { x:10.5, y:5.5,  alive:true },
-    { x:5.5,  y:11.5, alive:true },
-    { x:13.5, y:9.5,  alive:true },
-    { x:8.5,  y:13.5, alive:true },
-    { x:1.5,  y:12.5, alive:true },
-  ];
+  // Collect all valid open floor tiles
+  let openTiles = [];
+  for (let row = 1; row < ROWS - 1; row++) {
+    for (let col = 1; col < COLS - 1; col++) {
+      if (MAP[row][col] === 0) {
+        openTiles.push({ x: col + 0.5, y: row + 0.5 });
+      }
+    }
+  }
+
+  // Track used positions to avoid overlap
+  let usedPositions = [];
+
+  // Pick a random valid tile
+  function pickRandom(minDistFromStart, minDistFromOthers) {
+    let attempts = 0;
+    while (attempts < 200) {
+      attempts++;
+      let idx  = Math.floor(Math.random() * openTiles.length);
+      let tile = openTiles[idx];
+      if (!tile) continue;
+
+      // Far enough from player start
+      let distFromStart = Math.sqrt(
+        (tile.x - player.x) ** 2 + (tile.y - player.y) ** 2
+      );
+      if (distFromStart < minDistFromStart) continue;
+
+      // Far enough from exit
+      const ex = LEVELS[currentLevel].exit;
+      let distFromExit = Math.sqrt(
+        (tile.x - ex.x) ** 2 + (tile.y - ex.y) ** 2
+      );
+      if (distFromExit < 2) continue;
+
+      // Far enough from already placed items
+      let tooClose = false;
+      for (let pos of usedPositions) {
+        if (Math.sqrt((tile.x - pos.x) ** 2 + (tile.y - pos.y) ** 2) < minDistFromOthers) {
+          tooClose = true;
+          break;
+        }
+      }
+      if (tooClose) continue;
+
+      usedPositions.push({ x: tile.x, y: tile.y });
+      return { x: tile.x, y: tile.y };
+    }
+
+    // Fallback — return any open tile
+    let fallback = openTiles[Math.floor(Math.random() * openTiles.length)];
+    if (fallback) usedPositions.push({ x: fallback.x, y: fallback.y });
+    return fallback || { x: 2.5, y: 2.5 };
+  }
+
+  // Key colours
+  const keyColors = ['#FFD700', '#00BFFF', '#FF69B4', '#FF4500', '#00FF88'];
+
+  // Place keys randomly
+  const lv = LEVELS[currentLevel];
+  keys_items = [];
+  for (let i = 0; i < lv.keysNeeded; i++) {
+    let pos = pickRandom(4, 3);
+    keys_items.push({
+      x:     pos.x,
+      y:     pos.y,
+      color: keyColors[i % keyColors.length],
+      alive: true,
+    });
+  }
+
+  // Place coins randomly
+  const coinCounts = [6, 6, 7, 7, 8, 0];
+  let coinCount    = coinCounts[currentLevel] || 0;
+  coins = [];
+  for (let i = 0; i < coinCount; i++) {
+    let pos = pickRandom(2, 2);
+    coins.push({
+      x:     pos.x,
+      y:     pos.y,
+      alive: true,
+    });
+  }
 
   collectedKeys = 0;
   flashTimer    = 0;
   flashMsg      = '';
   exitVisible   = false;
 }
+
 
 function worldToScreen(wx, wy) {
   let dx   = wx - player.x;

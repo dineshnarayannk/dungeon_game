@@ -24,12 +24,12 @@ document.addEventListener('keydown', e => {
       startResume();
     }
   }
-  if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key))
-    e.preventDefault();
   if (e.key === 'Escape') {
     togglePause();
     document.exitPointerLock();
   }
+  if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key))
+    e.preventDefault();
 });
 
 document.addEventListener('keyup', e => {

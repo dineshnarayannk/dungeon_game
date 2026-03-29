@@ -107,8 +107,10 @@ function updateEnemies() {
 
     // Damage on contact
     if (dist < 0.5) {
-      player.hp = Math.max(0, player.hp - 0.4);
-      triggerDamageFlash();
+      if (!shieldActive) {
+        player.hp = Math.max(0, player.hp - 0.4);
+        triggerDamageFlash();
+      }
     }
 
     if (player.hp <= 0 && gameState !== 'dead') {
@@ -179,9 +181,11 @@ function updateBoss() {
   }
   //Damage player on contact - harder than normal enemies
   if (dist < 0.8){
-    player.hp = Math.max(0, player.hp - 1.5);
-    damageFlashTimer = 18;
-    screenShake = 8;
+    if (!shieldActive) {
+      player.hp = Math.max(0, player.hp - 1.5);
+      damageFlashTimer = 18;
+      screenShake = 8;
+    }
   }
   if (player.hp <= 0 && gameState !== 'dead' ) {
     gameState = 'dead';

@@ -16,6 +16,11 @@ let levelTransMsg   = '';
 let isPaused = false;
 let countdownTimer = 0;
 let countdownValue = 3;
+let healthCharges = 2;
+let ammoCharges = 2;
+let shieldCharges = 1;
+let shieldActive = false;
+let shieldTimer = 0;
 
 // ── LOAD LEVEL ────────────────────────────────────────────────
 function loadLevel(idx) {
@@ -71,8 +76,25 @@ function initGame() {
   player.hp    = 100;
   player.angle = 0;
   gameState    = 'playing';
+  dayTimer = 0;
+  weatherTimer = 0;
+  dayPhase = 'day';
+  weatherPhase = 'clear';
+  rainDrops = [];
+  lightningTimer = 0;
+  lightningAlpha = 0;
   loadLevel(0);
   document.getElementById('pause-btn').classList.remove('hidden');
+  healthCharges = 2;
+  ammoCharges = 2;
+  shieldCharges = 1;
+  shieldActive = false;
+  shieldTimer = 0;
+  const sBtn = document.getElementById('shield-btn');
+  if (sBtn) sBtn.classList.remove('active');
+  updatePowerUI();
+  const pw = document.getElementById('powerups');
+  if (pw) pw.classList.remove('hidden');
 }
 
 function togglePause() {
@@ -126,6 +148,64 @@ function goMainMenu() {
 
   const msg = document.getElementById('msg');
   if (msg) msg.textContent = 'Collect required Keys and Kill required Enemies to reach the exit gate!';
+
+  const pw = document.getElementById('powerups');
+  if (pw) pw.classList.add('hidden');
+}
+
+function usePower(type) {
+  if (gameState !== 'playing') return;
+
+  if (type === 'health'){
+    if (healthCharges <= 0) return;
+    healthCharges--;
+    player.hp = 100;
+    killFeed.unshift({msg: '❤ HEALTH RESTORED!',timer: 60 });
+    if (killFeed.length > 4) killFeed.pop();
+    if (typeof playSound === 'function') playSound('key');
+    updatePowerUI();
+  }
+
+  if (type === 'ammo') {
+    if (ammoCharges <= 0)return;
+    ammoCharges--;
+    ammo = 35;
+    killFeed.unshift({msg: '🔫 AMMO REFILLED!', timer: 60});
+    if (killFeed.length > 4) killFeed.pop();
+    if (typeof playSound === 'function') playSound('coin');
+    updatePowerUI();
+  }
+
+  if (type === 'shield') {
+    if (shieldCharges <= 0 || shieldActive) return;
+    shieldCharges--;
+    shieldActive = true;
+    shieldTimer = 20 * 60;
+    killFeed.unshift({msg: '🛡 SHIELD ACTIVE 20s!', timer: 60 }) ;
+    if (killFeed.length > 4) killFeed.pop();
+    if (typeof playSound === 'function') playSound('key');
+    document.getElementById('shield-btn').classList.add('active');
+    updatePowerUI();
+  }
+}
+
+function updatePowerUI() {
+  const hBtn = document.getElementById('health-btn');
+  const aBtn = document.getElementById('ammo-btn') ;
+  const sBtn = document.getElementById('shield-btn');
+  const hCnt = document.getElementById('health-count');
+  const aCnt = document.getElementById('ammo-count');
+  const sCnt = document.getElementById('shield-count');
+
+  if (!hBtn) return;
+
+  hCnt.textContent = healthCharges;
+  aCnt.textContent = ammoCharges;
+  sCnt.textContent = shieldActive ? '⏱' : shieldCharges;
+
+  hBtn.classList.toggle('empty',healthCharges <= 0);
+  aBtn.classList.toggle('empty', ammoCharges <= 0);
+  sBtn.classList.toggle('empty', shieldCharges <= 0 && !shieldActive);
 }
 
 // ── SHOOT ─────────────────────────────────────────────────────
@@ -397,6 +477,31 @@ function drawHUD() {
     g.addColorStop(1, `rgba(180,0,0,${ei})`);
     ctx.fillStyle = g;
     ctx.fillRect(0, 0, W, H);
+  }
+
+  // Shield active overlay - blue tint around edges
+  if (shieldActive) {
+    let pulse = 0.3 + 0.2 * Math.sin(Date.now() * 0.005);
+    let sg = ctx.createRadialGradient(W/2, H/2, H*0.4, W/2, H/2, H*0.95);
+    sg.addColorStop(0, 'rgba(0,150,255,0)') ;
+    sg.addColorStop(1, `rgba(0,150,255,${pulse})`);
+    ctx.fillStyle = sg;
+    ctx.fillRect(0, 0, W, H);
+
+    // Shield timer bar at top
+    let timeLeft = shieldTimer / (20 * 60);
+    ctx.fillStyle = 'rgba(0,0,0,0.5)' ;
+    ctx.fillRect(W/2 - 80 , 8, 160 , 10);
+    ctx.fillStyle = '#00bfff';
+    ctx.fillRect(W/2 - 80, 8, 160 * timeLeft , 10);
+    ctx.strokeStyle = '#0080aa' ;
+    ctx.lineWidth = 1;
+    ctx.strokeRect(W/2 - 80 , 8, 160, 10);
+    ctx.fillStyle = '#fff' ;
+    ctx.font = '9px monospace';
+    ctx.textAlign = 'center' ;
+    ctx.fillText('SHIELD', W/2, 24);
+    ctx.textAlign = 'left';
   }
 
   // KEYS row
@@ -910,17 +1015,39 @@ function loop() {
       pauseBtn.classList.remove('hidden');
     }
   }
+  const pw = document.getElementById('powerups') ;
+  if (pw) {
+    if (gameState === 'start' || gameState === 'dead' || gameState === 'win') {
+      pw.classList.add('hidden');
+    } else {
+      pw.classList.remove('hidden');
+    }
+  }
   
   handleInput();
   if (gameState === 'playing') {
     updateEnemies();
     collectItems();
+    updateWeather();
+
+    // Update shield timer
+    if (shieldActive) {
+      shieldTimer--;
+      if (shieldTimer <= 0) {
+        shieldActive = false;
+        const sBtn = document.getElementById('shield-btn');
+        if (sBtn) sBtn.classList.remove('active');
+        killFeed.unshift({ msg: '🛡 SHIELD EXPIRED', timer: 60 });
+        updatePowerUI();
+      }
+    }
     if (currentLevel === LEVELS.length - 1){
       updateBoss();
       checkExit();
       if (introTimer > 0) introTimer--;
     }
   }
+
   // Countdown logic
   if (gameState === 'countdown') {
     countdownTimer--;
@@ -934,6 +1061,7 @@ function loop() {
     }
   }
   drawScene();
+  drawWeather();
   drawSprites();
   drawEnemies();
   drawExit();
@@ -944,6 +1072,7 @@ function loop() {
   drawParticles();
   drawGun();
   drawHUD();
+  drawWeatherHUD();
   drawPauseScreen();
   drawCountdown();
   if (gameState !== 'start') drawMinimap();

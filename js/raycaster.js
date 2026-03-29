@@ -37,27 +37,47 @@ function castRay(angle) {
 function drawScene() {
   const lv = LEVELS[currentLevel];
 
-  ctx.fillStyle = lv.skyColor;
-  ctx.fillRect(0, 0, W, H);
-  ctx.fillStyle = lv.floorColor;
+  // Get day/night sky and floor colours
+  let dayColors = (typeof getDayColors === 'function' && currentLevel !== LEVELS.length - 1) 
+    ? getDayColors()
+    : { sky: lv.skyColor, floor: lv.floorColor };
+
+  ctx.fillStyle = dayColors.sky;
+  ctx.fillRect(0,0,W,H);
+  ctx.fillStyle = dayColors.floor;
   ctx.fillRect(0, HALF, W, HALF);
 
   const sliceW = W / RAYS;
+  const dayBright = (   typeof getDayBrightness === 'function' && currentLevel !== LEVELS.length - 1) 
+    ? getDayBrightness()
+    : 1.0;
+  const flickerMult = (typeof torchFlicker !== 'undefined') ? torchFlicker : 1.0;
 
-  for (let i = 0; i < RAYS; i++) {
-    let angle  = player.angle - FOV / 2 + i * STEP;
-    let { dist, wt } = castRay(angle);
-    let corr   = dist * Math.cos(angle - player.angle);
-    let wallH  = Math.min(H, H / corr);
-    let bright = Math.max(0, 1 - corr / MAX_DEPTH);
-    let base   = wt === 0 ? lv.color : lv.color2;
+  for (let i = 0 ; i < RAYS; i++){
+    let angle = player.angle - FOV / 2 + i * STEP;
+    let { dist , wt} = castRay(angle);
+    let corr = dist * Math.cos(angle - player.angle);
+    let wallH = Math.min(H, H / corr);
+
+    // Apply day brightness + torch flicker to wall brightness
+    let bright = Math.max(0, 1 - corr / MAX_DEPTH) * dayBright * flickerMult;
+
+    let base = wt === 0 ? lv.color : lv.color2;
     let r = Math.floor(base[0] * bright);
-    let g = Math.floor(base[1] * bright);
+    let g = Math.floor(base[0] * bright);
     let b = Math.floor(base[2] * bright);
-    ctx.fillStyle = `rgb(${r},${g},${b})`;
+    ctx.fillStyle = `rgb(${r},${g},${b})` ;
     ctx.fillRect(i * sliceW, HALF - wallH / 2, sliceW + 1, wallH);
 
-    // Store corrected wall distance for this column
     zBuffer[i] = corr ;
+  }
+
+  // Day tint overlay
+  let tint = (typeof getDayTint === 'function' && currentLevel !== LEVELS.length - 1)
+    ? getDayTint()
+    : null;
+  if (tint) {
+    ctx.fillStyle = tint;
+    ctx.fillRect(0,0,W,H);
   }
 }
