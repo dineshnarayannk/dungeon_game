@@ -126,79 +126,106 @@ body {
   display: none;
 }
 
-#powerups{
+#powerups {
   position: absolute;
-  top: 100px;
+  top: 95px;
   left: 10px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  z-index: 10;
+  gap: 10px;
+  z-index: 10;  
 }
 
-.power-btn{
-  width: 52px;
-  height: 52px;
+.power-btn {
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
-  border: 3px solid rgba(255,255,255,0.3);
+  border: 3px solid rgba(255,255,255,0.25);
   cursor: pointer;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: 22px;
+  font-size: 26px;
   position: relative;
-  transition: transform 0.15s, border-color 0.2s;
-  box-shadow: 0 0 12px rgba(0,0,0,0.5);
+  transition: transform 0.15s;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.6), inset 0 2px 4px rgba(255,255,255,0.15);
   user-select: none;
 }
 
-.power-btn:hover{
+.power-btn:hover {
   transform: scale(1.12);
-  border-color: rgba(255,255,255,0.8);
+  border-color: rgba(255,255,255,0.7);
 }
 
-.power-btn:active{
-  transform: scale(0.95);
+.power-btn:active {
+  transform: scale(0.93);
 }
 
-.power-btn.empty{
+.power-btn.empty {
   opacity: 0.35;
   cursor: not-allowed;
   filter: grayscale(1);
 }
 
+/* Count badge - bottom right */
 .power-btn.count {
   position: absolute;
-  bottom: -4px;
-  right: -4px;
-  background: #111;
-  color: #fff;
-  font-size: 11px;
+  bottom: -5px;
+  right: -5px;
+  background: #1a1a1a;
+  color: #ffffff;
+  font-size: 12px;
   font-weight: bold;
   font-family: monospace;
-  width: 18px;
-  height: 18px;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 2px solid #444;
+  border: 2px solid rgba(255,255,255,0.3);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.7);
+  z-index: 2;
 }
 
-#health-btn { background: radial-gradient(circle at 35% 35%, #e74c3c, #7b1a1a); }
-#ammo-btn { background: radial-gradient(circle at 35% 35%, #e8b84b, #7a5a00); }
-#shield-btn {background: radial-gradient(circle at 35% 35%, #3498db, #0a3a6a); }
+/* Health button - red */
+#health-btn {
+  background: radial-gradient(circle at 38% 35%,
+    #ff6b6b 0%,
+    #c0392b 45%,
+    #7b1a1a 100%);
+  border-color: rgba(255,100,100,0.5);
+}
+
+/* Ammo button - golden yellow */
+#ammo-btn {
+  background: radial-gradient(circle at 38% 35%,
+    #ffe066 0%, 
+    #e8b84b 45%,
+    #7a5a00 100%);
+  border-color: rgba(255,210,80,0.5);
+}
+
+/* Shield button - blue */
+#shield-btn {
+  background: radial-gradient(circle at 38% 35% ,
+    #74c0fc 0%,
+    #3498db 45%,
+    #0a3a6a 100%);;
+  border-color: rgba(100,180,255,0.5);
+}
 
 #shield-btn.active {
   border-color: #00bfff;
-  box-shadow: 0 0 18px #00bfff, 0 0 6px #fff;
+  box-shadow: 0 0 20px #00bfff,
+              0 0 8px #fff,
+              inset 0 2px 4px rgba(255,255,255,0.2);
   animation: shieldPulse 1s infinite alternate;
 }
 
-@keyframes shieldPulse {
-  from { box-shadow: 0 0 10px #00bfff; }
-  to { box-shadow: 0 0 24px #00bfff, 0 0 8px #fff; }
+@keyframes shieldaPulse {
+  from { box-shadow: 0 0 10px #00bfff, inset 0 2px 4px rgba(255,255,255,0.15); }
+  to {  box-shadow: 0 0 28px #00bfff, 0 0 10px #fff, inset 0 2px 4px rgba(255,255,255,0.2); }
 }
 
-#powerups.hidden { display: none ; }
+#powerups.hidden { display: none; }
