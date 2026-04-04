@@ -269,7 +269,7 @@ body {
 }
 
 #lc-level-name {
-  color: #7b3f00;
+  color: #F5C451;
   font-family: monospace;
   font-size: 15px;
   font-weight: bold;
@@ -278,7 +278,7 @@ body {
 }
 
 #lc-score {
-  color: #7b3f00;
+  color: #F5C451;
   font-family: monospace;
   font-size: 18px;
   font-weight: bold;
@@ -286,7 +286,7 @@ body {
 }
 
 #lc-kills-stat {
-  color: #7b3f00;
+  color: #F5C451;
   font-family: monospace;
   font-size: 14px;
   margin-bottom: 20px;
