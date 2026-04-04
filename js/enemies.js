@@ -41,46 +41,82 @@ function drawEnemies() {
     if (!e.alive) return;
     let proj = worldToScreen(e.x, e.y);
     if (!proj) return;
-    let { sx, size, dist, column } = proj;
+    let { sx , size , dist, column } = proj ;
     if (dist > MAX_DEPTH) return;
-    
-    // Only draw if enemy is in front of wall
-    if (column >= 0 && column < RAYS && dist >= zBuffer[column]) return ;
+    if (column >= 0 && column < RAYS && dist >= zBuffer[column]) return;
 
-    let bright   = Math.max(0.2, 1 - dist / MAX_DEPTH);
+    let bright = Math.max(0.2, 1 - dist / MAX_DEPTH);
     let flashing = e.flashTimer > 0;
+    let gs = Math.max(0.3, size * 0.012);
 
-    // Body
     ctx.globalAlpha = bright;
-    ctx.fillStyle   = flashing ? '#ff9999' : '#c0392b';
-    ctx.fillRect(sx - size * 0.22, HALF - size * 0.45, size * 0.44, size * 0.65);
+    ctx.save();
+    ctx.translate(sx, HALF);
+    ctx.scale(gs, gs);
 
-    // Head
-    ctx.fillStyle = flashing ? '#ffcccc' : '#e74c3c';
+    // Ghost body color
+    let bodyColor = flashing ? '#ff9999' : '#cc0000';
+
+    // Ghost main  body - rounded top
     ctx.beginPath();
-    ctx.arc(sx, HALF - size * 0.5, size * 0.24, 0, Math.PI * 2);
+    ctx.arc(0, -28, 28, Math.PI, 0, false); // rounded head top
+    ctx.lineTo(28, 18);                     // right side down
+
+    // Wavy bottom - ghost skirt
+    ctx.quadraticCurveTo(21, 26, 14, 18);
+    ctx.quadraticCurveTo(7, 10, 0, 18);
+    ctx.quadraticCurveTo(-7, 26, -14, 18);
+    ctx.quadraticCurveTo(-21, 10, -28, 18);
+    ctx.lineTo(-28,-28);
+    ctx.fillStyle = bodyColor;
     ctx.fill();
 
-    // Horns
-    ctx.fillStyle = '#ff6b6b';
-    ctx.fillRect(sx - size * 0.09, HALF - size * 0.56, size * 0.07, size * 0.14);
-    ctx.fillRect(sx + size * 0.02, HALF - size * 0.56, size * 0.07, size * 0.14);
+    // Black outline 
+    ctx.strokeStyle = '#000';
+    ctx.lineWidth = 3;
+    ctx.stroke();
 
-    // HP bar — always full opacity
+    // Left eye - white circle
+    ctx.beginPath();
+    ctx.arc(-10, -28, 9, 0, Math.PI * 2);
+    ctx.fillStyle = '#ffffff';
+    ctx.fill();
+    ctx.strokeStyle = '#000'; ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // Right eye - white circle
+    ctx.beginPath();
+    ctx.arc(10, -28, 9, 0, Math.PI * 2);
+    ctx.fillStyle = '#ffffff';
+    ctx.fill();
+    ctx.stroke();
+
+    // Left pupil - black dot
+    ctx.beginPath();
+    ctx.arc(-10, -27, 4, 0, Math.PI * 2);
+    ctx.fillStyle = '#000000';
+    ctx.fill();
+
+    // Right pupil - black dot
+    ctx.beginPath();
+    ctx.arc(10, -27, 4, 0, Math.PI * 2);
+    ctx.fillStyle = '#000000';
+    ctx.fill();
+
+    ctx.restore();
     ctx.globalAlpha = 1;
+
+    // HP bar - always full opacity
     let bw = Math.max(20, size * 0.55);
     let bh = 5;
     let bx = sx - bw / 2;
     let by = HALF - size * 0.82;
-    ctx.fillStyle = '#000000';
-    ctx.fillRect(bx - 1, by - 1, bw + 2, bh + 2);
-    ctx.fillStyle = '#333333';
-    ctx.fillRect(bx, by, bw, bh);
-    let hpRatio   = Math.max(0, e.hp / e.maxHp);
+    ctx.fillStyle = '#000000' ; ctx.fillRect(bx-1, by-1, bw+2, bh+2);
+    ctx.fillStyle = '#333333' ; ctx.fillRect(bx, by, bw, bh);
+    let hpRatio = Math.max(0 , e.hp / e.maxHp);
     ctx.fillStyle = hpRatio > 0.5 ? '#2ecc71' : '#e74c3c';
     ctx.fillRect(bx, by, bw * hpRatio, bh);
 
-    ctx.globalAlpha = 1;
     if (e.flashTimer > 0) e.flashTimer--;
   });
 }
@@ -317,6 +353,7 @@ function checkExit() {
   const ex = LEVELS[currentLevel].exit;
   if (Math.sqrt((ex.x - player.x)**2 + (ex.y - player.y)**2 ) < 1.0 ){
     gameState = 'win';
-    playSound('win');
+    if (typeof playSound === 'function') playSound('win');
+    setTimeout(() => showLevelComplete(currentLevel), 100);
   }
 }

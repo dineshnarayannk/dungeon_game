@@ -21,6 +21,7 @@ let ammoCharges = 2;
 let shieldCharges = 1;
 let shieldActive = false;
 let shieldTimer = 0;
+let lcLevel = 0;
 
 // ── LOAD LEVEL ────────────────────────────────────────────────
 function loadLevel(idx) {
@@ -95,6 +96,9 @@ function initGame() {
   updatePowerUI();
   const pw = document.getElementById('powerups');
   if (pw) pw.classList.remove('hidden');
+  hideLevelComplete();
+  const nextBtn = document.getElementById('lc-next');
+  if (nextBtn) nextBtn.style.display = 'flex';
 }
 
 function togglePause() {
@@ -151,6 +155,67 @@ function goMainMenu() {
 
   const pw = document.getElementById('powerups');
   if (pw) pw.classList.add('hidden');
+}
+
+function showLevelComplete(idx) {
+  lcLevel = idx;
+  const lv = LEVELS[idx];
+  const screen = document.getElementById('level-complete-screen');
+  const banner = document.getElementById('lc-banner');
+  const name = document.getElementById('lc-level-name');
+  const sc = document.getElementById('lc-score');
+  const kl = document.getElementById('lc-kills-stat');
+  const next = document.getElementById('lc-next');
+
+  if (!screen) return;
+
+  // Boss complete - different message , no next button
+  if (idx === LEVELS.length - 1) {
+    banner.textContent = 'BOSS DEFEATED!';
+    name.textContent = 'ALL LEVELS COMPLETE!';
+    if (next) next.style.display = 'none';
+  } else {
+    banner.textContent = 'LEVEL COMPLETED!';
+    name.textContent = 'LEVEL ' + (idx + 1) + '  —  ' + lv.name;
+    if (next) next.style.display = 'flex';
+  }
+
+  sc.textContent = 'SCORE: ' + score;
+  kl.textContent = 'KILLS: ' + kills;
+
+  screen.classList.remove('hidden');
+
+  // Pause the game while screen shows
+  if (spawnInterval) { clearInterval(spawnInterval); spawnInterval = null; }
+}
+
+function hideLevelComplete() {
+  const screen = document.getElementById('level-complete-screen');
+  if (screen) screen.classList.add('hidden');
+}
+
+function lcRetry() {
+  hideLevelComplete();
+  // Restart from the level the player just completed
+  score = 0; kills = 0;
+  player.hp = 100;
+  player.angle = 0;
+  gameState = 'playing';
+  loadLevel(lcLevel);
+}
+
+function lcNext() {
+  hideLevelComplete();
+  if (lcLevel + 1 < LEVELS.length) {
+    currentLevel = lcLevel + 1;
+    gameState = 'playing';
+    loadLevel(currentLevel);
+  }
+}
+
+function lcMenu() {
+  hideLevelComplete();
+  goMainMenu();
 }
 
 function usePower(type) {
@@ -623,51 +688,6 @@ function drawHUD() {
     ctx.textAlign = 'left';
   }
 
-  // Level complete screen
-  if (gameState === 'levelcomplete') {
-    ctx.fillStyle = 'rgba(0,0,0,0.85)';
-    ctx.fillRect(0, 0, W, H);
-    ctx.fillStyle = '#FFD700';
-    ctx.font      = 'bold 40px monospace';
-    ctx.textAlign = 'center';
-    ctx.fillText(levelTransMsg, W / 2, H / 2 - 60);
-    ctx.fillStyle = '#fff';
-    ctx.font      = '22px monospace';
-    ctx.fillText('Score: ' + score + '   Kills: ' + kills, W / 2, H / 2 - 10);
-    ctx.fillStyle = '#7c6fff';
-    ctx.font      = 'bold 24px monospace';
-    ctx.fillText(
-      'LEVEL ' + (currentLevel + 2) + ': ' + LEVELS[currentLevel + 1].name,
-      W / 2, H / 2 + 45
-    );
-    ctx.fillStyle = '#aaa';
-    ctx.font      = '16px monospace';
-    ctx.fillText('Get ready...', W / 2, H / 2 + 85);
-    ctx.textAlign = 'left';
-    levelTransTimer--;
-    if (levelTransTimer <= 0) {
-      currentLevel++;
-      loadLevel(currentLevel);
-    }
-  }
-
-  // Boss intro banner
-  if (currentLevel === LEVELS.length - 1 && introTimer > 0){
-    let alpha = Math.min(1, introTimer / 30);
-    ctx.fillStyle = `rgba(0,0,0,${alpha * 0.85})`;
-    ctx.fillRect(0,0,W,H);
-    ctx.fillStyle = `rgba(220,0,0,${alpha})`;
-    ctx.font = 'bold 48px monospace'; ctx.textAlign = 'center';
-    ctx.fillText('FINAL BOSS',W/2, H/2 - 30);
-    ctx.fillStyle = `rgba(255,150,0,${alpha})`;
-    ctx.font = 'bold 20px monospace';
-    ctx.fillText('Defeat the boss to open the exit!', W/2 , H/2 + 20);
-    ctx.fillStyle = `rgba(0,255,136,${alpha * 0.8})`;
-    ctx.font = '16px monospace';
-    ctx.fillText('HP and AMMO fully restored — Good luck!',W/2,H/2 + 55);
-    ctx.textAlign = 'left';
-  }
-
   // Boss enraged warning 
   if (currentLevel === LEVELS.length - 1 && boss.alive && boss.hp / boss.maxHp < 0.5){
     let pulse = 0.5 + 0.5 * Math.sin(Date.now() * 0.008);
@@ -692,27 +712,6 @@ function drawHUD() {
     ctx.font = 'bold 16px monospace';
     ctx.textAlign = 'center' ;
     ctx.fillText('EXIT GATE OPEN —  REACH IT TO WIN!',W/2, H - 55);
-    ctx.textAlign = 'left';
-  }
-
-  // Win screen
-  if (gameState === 'win') {
-    ctx.fillStyle = 'rgba(0,0,0,0.88)'; ctx.fillRect(0,0,W,H);
-    if (currentLevel === LEVELS.length - 1){
-      ctx.fillStyle = '#FFD700'; ctx.font = 'bold 44px monospace'; ctx.textAlign = 'center';
-      ctx.fillText('BOSS DEFEATED!', W/2 , H/2 - 70);
-      ctx.fillStyle = '#00FF88'; ctx.font = 'bold 28px monospace';
-      ctx.fillText('ALL LEVELS COMPLETE!',W/2, H/2 - 20);
-    } else {
-      ctx.fillStyle = '#FFD700'; ctx.font = 'bold 40px monospace'; ctx.textAlign = 'center';
-      ctx.fillText('YOU ESCAPED!',W/2 , H/2 - 70);
-      ctx.fillStyle = '#fff'; ctx.font = 'bold 24px monospace';
-      ctx.fillText('ALL LEVELS COMPLETED!',W/2 , H/2 - 20);
-    }
-    ctx.fillStyle = '#aaa'; ctx.font = '20px monospace';
-    ctx.fillText('Final Score: ' + score + '  Kills: ' + kills,W/2 , H/2 + 30);
-    ctx.fillStyle = '#7c6fff'; ctx.font = '16px monospace';
-    ctx.fillText('Press R to play again', W/2, H/2 + 75);
     ctx.textAlign = 'left';
   }
 

@@ -229,3 +229,104 @@ body {
 }
 
 #powerups.hidden { display: none; }
+
+#level-complete-screen {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  display:flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  background: rgba(0,0,0,0.75);
+}
+
+#level-complete-screen.hidden {display: none; }
+
+#lc-panel {
+  background: liner-gradient(160deg, #f5a623, #f07e00);
+  border: 5px solid #e8b84b;
+  border-radius: 20px;
+  padding: 30px 40px;
+  text-align: center;
+  min-width: 360px;
+  box-shadow: 0 0 40px rgba(0,0,0,0.7), inset 0 2px 8px rgba(255,255,255,0.2);
+}
+
+#lc-banner {
+  background: liner-gradient(90deg, #c0392b, #e74c3c, #c0392b);
+  color: #fff;
+  font-family: monospace;
+  font-size: 22px;
+  font-weight: bold;
+  padding: 10px 24px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  letter-spacing: 2px;
+  border: 3px solid #922b21;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+  text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+}
+
+#lc-level-name {
+  color: #7b3f00;
+  font-family: monospace;
+  font-size: 15px;
+  font-weight: bold;
+  margin-bottom: 10px;
+  text-shadow: 0 1px 2px rgba(255,255,255,0.3);
+}
+
+#lc-score {
+  color: #7b3f00;
+  font-family: monospace;
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 6px;
+}
+
+#lc-kills-stat {
+  color: #7b3f00;
+  font-family: monospace;
+  font-size: 14px;
+  margin-bottom: 20px;
+}
+
+#lc-buttons {
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.lc-btn {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  border: 4px solid rgba(255,255,255,0.4);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  font-family: monospace;
+  transition: transform 0.15s, box-shadow 0.15s;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4), inset 0 2px 4px rgba(255,255,255,0.2);
+  user-select: none;  
+}
+
+.lc-btn:hover { transform: scale(1.12); }
+.lc-btn:active { transform: scale(0.93); }
+
+.lc-btn span {
+  font-size: 10px;
+  color: #fff;
+  margin-top: 2px;
+  font-weight: bold;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+}
+
+#lc-retry { background: radial-gradient(circle at 35% 35%, #e67e22, #a04000); }
+#lc-next { background: radial-gradient(circle at 35% 35%, #2ecc71, #1a7a40); }
+#lc-menu { background: radial-gradient(circle at 35% 35%, #3498db, #0a3a6a); }

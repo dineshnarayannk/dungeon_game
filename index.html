@@ -66,5 +66,26 @@
   <script src="js/enemies.js"></script>
   <script src="js/weather.js"></script>  
   <script src="js/game.js"></script>
+
+  <div id="level-complete-screen" class="hidden">
+    <div id="lc-panel">
+      <div id="lc-banner">LEVEL COMPLETED!</div>
+      <div id="lc-level-name">LEVEL 1 — THE DUNGEON</div>
+      <div id="lc-score">SCORE: 0</div>
+      <div id="lc-kills-stat">KILLS: 0</div>
+      <div id="lc-buttons">
+        <div class="lc-btn" id="lc-retry" onclick="lcRetry()">
+          ↺<span>RETRY</span>
+        </div>
+        <div class="lc-btn" id="lc-next" onclick="lcNext()">
+          ▶<span>NEXT</span>
+        </div>
+        <div class="lc-btn" id="lc-menu" onclick="lcMenu()">
+          ⌂<span>MENU</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </body>
 </html>
