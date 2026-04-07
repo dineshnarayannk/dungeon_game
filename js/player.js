@@ -15,8 +15,7 @@ document.addEventListener('keydown', e=> {
   if (e.code === 'Space') {
     e.preventDefault();
     if (gameState === 'start') {
-      gameStarted = true;
-      initGame();
+      startGameFromHome();
     } else if (gameState === 'playing') {
       shoot();
     } else if (gameState === 'paused') {

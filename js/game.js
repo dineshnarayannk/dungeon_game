@@ -22,6 +22,7 @@ let shieldCharges = 1;
 let shieldActive = false;
 let shieldTimer = 0;
 let lcLevel = 0;
+let globalVolume = 0.7;
 
 // ── LOAD LEVEL ────────────────────────────────────────────────
 function loadLevel(idx) {
@@ -71,6 +72,8 @@ function loadLevel(idx) {
 
 // ── INIT GAME ─────────────────────────────────────────────────
 function initGame() {
+  const home = document.getElementById('home-screen');
+  if (home) home.classList.add('hidden');
   currentLevel = 0;
   score        = 0;
   kills        = 0;
@@ -126,35 +129,188 @@ function resumeGame() {
 }
 
 function goMainMenu() {
-  if (spawnInterval) {
-    clearInterval(spawnInterval);
-    spawnInterval = null;
-  }
+  if (spawnInterval) { clearInterval(spawnInterval); spawnInterval = null; }
   gameState = 'start';
   isPaused = false;
   gameStarted = false;
   currentLevel = 0;
-  kills = 0;
-  enemies = [];
-  particles = [];
-  killFeed = [];
-  exitVisible = false;
-  damageFlashTimer = 0;
-  waveTimer = 0;
-
+  score = 0; kills = 0 ; 
+  enemies = []; particles = []; killFeed = [];
+  exitVisible = false; damageFlashTimer = 0; waveTimer = 0;
   document.exitPointerLock();
-
   const pb = document.getElementById('pause-btn');
   if (pb) { pb.textContent = '⏸'; pb.classList.add('hidden'); }
-
   const lt = document.getElementById('level-title');
   if (lt) lt.textContent = 'DUNGEON 3D';
 
-  const msg = document.getElementById('msg');
-  if (msg) msg.textContent = 'Collect required Keys and Kill required Enemies to reach the exit gate!';
+  // Show home screen
+  const home = document.getElementById('home-screen');
+  if (home) home.classList.remove('hidden');
 
-  const pw = document.getElementById('powerups');
-  if (pw) pw.classList.add('hidden');
+  hideLevelComplete();
+} 
+
+function startGameFromHome() {
+  const home = document.getElementById('home-screen');
+  if (home) home.classList.add('hidden');
+  gameStarted = true;
+  initGame();
+}
+
+function openSettings() {
+  const s = document.getElementById('settings-screen');
+  if (s) s.classList.remove('hidden');
+}
+
+function closeSettings() {
+  const s = document.getElementById('settings-screen');
+  if (s) s.classList.add('hidden');
+}
+
+function changeVolume(val) {
+  globalVolume = val / 100 ;
+  // Update all sound volumes
+  if (typeof sounds !== 'undefined') {
+    Object.keys(sounds).forEach(key => {
+      if (sounds[key]) sounds[key].volume = globalVolume;
+    });
+  }
+}
+
+function openSupport() {
+  window.open(
+    'mailto:dineshnk167@gmail.com' + 
+    '?subject=Dungeon 3D Support' + 
+    '&body=Hi, I need help with Dungeon 3D.%0A%0A' +
+    'Issue: %0A%0ADevice: ' + navigator.userAgent,
+    '_blank'
+  );
+}
+
+function openGuns() {
+  alert('Guns feature coming soon!');
+}
+
+// Update home screen coin count
+function updateHomeCoin(){
+  const el = document.getElementById('home-coin-count');
+  if (el) el.textContent = score;
+}
+
+// Draw animated player character on home screen
+function drawHomePlayer() {
+  const hc = document.getElementById('home-player-canvas');
+  if (!hc) return;
+  const hctx = hc.getContext('2d');
+  const hw = hc.width , hh = hc.height;
+  hctx.clearRect(0,0, hw, hh);
+
+  let t = Date.now() * 0.002;
+  let bob = Math.sin(t) * 4;
+  let cx = hw / 2;
+  let cy = hh / 2 + bob;
+
+  // Shadow
+  hctx.beginPath();
+  hctx.ellipse(cx, hh - 20, 40, 10, 0, 0, Math.PI * 2);
+  hctx.fillStyle = 'rgba(0,0,0,0.4)';
+  hctx.fill();
+
+  // Body armour
+  hctx.fillStyle = '#3a3a5a';
+  hctx.beginPath();
+  hctx.roundRect(cx - 28, cy - 20, 56, 80, 8);
+  hctx.fill();
+
+  // Armour chest plate
+  hctx.fillStyle = '#4a4a7a';
+  hctx.beginPath();
+  hctx.roundRect(cx - 20, cy - 15, 40, 50, 6);
+  hctx.fill();
+
+  // Armour detail lines
+  hctx.strokeStyle = '#6a6aaa';
+  hctx.lineWidth = 2;
+  hctx.beginPath();
+  hctx.moveTo(cx, cy - 10); hctx.lineTo(cx, cy + 30);
+  hctx.stroke();
+  hctx.beginPath();
+  hctx.moveTo(cx - 18, cy + 5); hctx.lineTo(cx + 18, cy + 5);
+  hctx.stroke();
+
+  // Helmet
+  hctx.fillStyle = '#2a2a4a';
+  hctx.beginPath();
+  hctx.arc(cx, cy - 40, 28, 0, Math.PI * 2);
+  hctx.fill();
+
+  // Visor 
+  hctx.fillStyle = '#00bfff';
+  hctx.shadowColor = '#00bfff';
+  hctx.shadowBlur = 10;
+  hctx.beginPath();
+  hctx.roundRect(cx - 16, cy - 50, 32, 14, 4);
+  hctx.fill();
+  hctx.shadowBlur = 0;
+
+  // Helmet detail
+  hctx.fillStyle = '#1a1a3a';
+  hctx.beginPath();
+  hctx.arc(cx, cy - 60, 10, Math.PI, 0);
+  hctx.fill();
+
+  // Left Arm
+  hctx.fillStyle = '#3a3a5a';
+  hctx.beginPath();
+  hctx.roundRect(cx - 42, cy - 16, 16, 55, 6);
+  hctx.fill();
+
+  // Right arm holding gun
+  hctx.fillStyle = '#3a3a5a';
+  hctx.beginPath();
+  hctx.roundRect(cx + 26, cy - 16, 16, 55, 6);
+  hctx.fill()
+
+  // Gun barrel
+  hctx.fillStyle = '#555';
+  hctx.fillRect(cx + 38, cy + 10, 22, 10);
+  hctx.fillStyle = '#444';
+  hctx.fillRect(cx + 32, cy + 5 , 18, 28);
+  hctx.fillStyle = '#333';
+  hctx.fillRect(cx + 36, cy + 28, 10, 16);
+
+  // Gun glow
+  hctx.fillStyle = 'rgba(255,200,0,0.15)';
+  hctx.beginPath();
+  hctx.arc(cx + 58, cy + 15, 8, 0, Math.PI * 2);
+  hctx.fill();
+
+  // Legs
+  hctx.fillStyle = '#2a2a4a';
+  hctx.beginPath();
+  hctx.roundRect(cx - 22, cy + 58, 18, 50, 5);
+  hctx.fill();
+  hctx.beginPath();
+  hctx.roundRect(cx + 4, cy + 58, 18, 50, 5);
+  hctx.fill();
+
+  // Boots
+  hctx.fillStyle = '#1a1a2a';
+  hctx.beginPath();
+  hctx.roundRect(cx - 24, cy + 98, 22, 16, 4);
+  hctx.fill();
+  hctx.beginPath();
+  hctx.roundRect(cx + 2, cy + 98, 22, 16, 4);
+  hctx.fill();
+
+  // Shoulder pads
+  hctx.fillStyle = '#5a5a8a';
+  hctx.beginPath();
+  hctx.ellipse(cx - 34, cy - 18, 12, 8, -0.3, 0, Math.PI * 2);
+  hctx.fill();
+  hctx.beginPath();
+  hctx.ellipse(cx + 34, cy - 18, 12, 8, 0.3, 0, Math.PI * 2);
+  hctx.fill();
 }
 
 function showLevelComplete(idx) {
@@ -731,46 +887,6 @@ function drawHUD() {
     ctx.fillText('Press R to restart', W / 2, H / 2 + 50);
     ctx.textAlign = 'left';
   }
-
-  // Start screen
-  if (gameState === 'start') {
-    document.getElementById('pause-btn').classList.add('hidden'); 
-    ctx.fillStyle = 'rgba(0,0,0,0.93)';
-    ctx.fillRect(0, 0, W, H);
-
-    ctx.fillStyle = '#7c6fff';
-    ctx.font      = 'bold 52px monospace';
-    ctx.textAlign = 'center';
-    ctx.fillText('DUNGEON 3D', W / 2, H / 2 - 150);
-
-    ctx.fillStyle = '#e8b84b';
-    ctx.font      = 'bold 20px monospace';
-    ctx.fillText('6 LEVELS  —  SURVIVE  —  ESCAPE', W / 2, H / 2 - 105);
-
-    ctx.fillStyle = '#7c6fff';
-    ctx.font      = 'bold 17px monospace';
-    ctx.fillText('LEVEL 1  —  THE DUNGEON', W / 2, H / 2 - 55);
-    ctx.fillStyle = '#2ecc71';
-    ctx.fillText('LEVEL 2  —  THE MAZE',    W / 2, H / 2 - 35);
-    ctx.fillStyle = '#e74c3c';
-    ctx.fillText('LEVEL 3  —  THE FORTRESS', W / 2, H / 2 - 15);
-    ctx.fillStyle = '#9b59b6';
-    ctx.fillText('LEVEL 4  —  THE CATACOMBS',W/2 , H/2 + 5);
-    ctx.fillStyle = '#888888';
-    ctx.fillText('LEVEL 5  —  THE ABYSS', W/2, H/2 + 25);
-    ctx.fillStyle = '#e74c3c';
-    ctx.fillText('FINAL BOSS  —  THE ARENA',W/2 , H/2 + 45);
-
-    ctx.fillStyle = '#ffffff';
-    ctx.font      = 'bold 26px monospace';
-    ctx.fillText('Press  SPACE  to Start', W / 2, H / 2 + 100);
-
-    ctx.fillStyle = '#555';
-    ctx.font      = '14px monospace';
-    ctx.fillText('W A S D  move   |   Arrow Keys  look   |   SPACE  shoot', W / 2, H / 2 + 145);
-    ctx.fillText('Collect all keys  →  Reach the exit  →  Next level',      W / 2, H / 2 + 168);
-    ctx.textAlign = 'left';
-  }
 }
 
 function drawPauseScreen() {
@@ -1076,6 +1192,11 @@ function loop() {
   drawCountdown();
   if (gameState !== 'start') drawMinimap();
   updateHUD();
+  // Animate home player
+  if (gameState === 'start') {
+    drawHomePlayer();
+    updateHomeCoin();
+  }
   requestAnimationFrame(loop);
 }
 

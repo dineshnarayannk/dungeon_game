@@ -48,6 +48,93 @@
 
     </div>
 
+    <!-- HOME SCREEN --------->
+    <div id="home-screen">
+
+      <!-- Title -->
+      <div id="home-title">DUNGEON 3D</div>
+      <div id="home-subtitle">SURVIVE  ·  FIGHT  ·  ESCAPE</div>
+
+      <!--- Main Layout - left buttons + player + right button -->
+      <div id="home-main-row">
+        <!-- LEFT SIDE - Settings and Guns-->
+        <div id="home-left-btns">
+          <div class="home-side-btn" onclick="openSettings()">
+            <span class="btn-icon">⚙</span>
+            SETTINGS
+          </div>
+          <div class="home-side-btn" onclick="openGuns()">
+            <span class="btn-icon">🔫</span>
+            GUNS
+          </div>
+        </div>
+
+        <!-- CENTER - Player Character-->
+        <div id="home-center">
+          <canvas id="home-player-canvas" width="180" height="280"></canvas>
+        </div>
+
+        <!-- RIGHT SIDE - Player button-->
+        <div id="home-right-btns">
+          <div id="home-play-btn" onclick="startGameFromHome()">
+            ▶▶<br>PLAY
+          </div>
+        </div>
+      </div>
+
+      <!-- Level pills at bottom -->
+      <div id="home-levels">
+        <span class="home-level-pill" style="color:#7c6fff;">LVL 1 — THE DUNGEON</span>
+        <span class="home-level-pill" style="color:#2ecc71;">LVL 2 — THE MAZE</span>
+        <span class="home-level-pill" style="color:#e74c3c;">LVL 3 — THE FORTRESS</span>
+        <span class="home-level-pill" style="color:#9b59b6;">LVL 4 — THE CATACOMBS</span>
+        <span class="home-level-pill" style="color:#888;">LVL 5 — THE ABYSS</span>
+        <span class="home-level-pill" style="color:#e74c3c;">FINAL BOSS — THE ARENA</span>
+      </div>
+    </div>
+
+    <!-- SETTINGS SCREEN -->
+    <div id="settings-screen" class="hidden">
+      <div id="settings-panel">
+
+        <div id="settings-title">⚙ SETTINGS</div>
+
+        <!-- Volume -->
+         <div class="settings-row">
+          <span class="settings-icon">🔊</span>
+          <span class="setting-label">Volume</span>
+          <input type="range" min="0" max="100" value="70" id="volume-slider" oninput="changeVolume(this.value)">
+         </div>
+
+         <!-- Language -->
+          <div class="settings-row">
+            <span class="settings-icon">🌐</span>
+            <span class="settings-label">Language</span>
+            <select id="lang-select">
+              <option value="en">English</option>
+              <option value="ta">Tamil</option>
+              <option value="hi">Hindi</option>
+              <option value="fr">French</option>
+              <option value="de">German</option>
+              <option value="es">Spanish</option>
+            </select>
+          </div>
+
+          <!-- Support -->
+          <div class="settings-row">
+            <span class="settings-icon">📧</span>
+            <span class="settings-label">Support</span>
+            <button class="settings-support-btn" onclick="openSupport()">
+              Contact Us
+            </button>
+          </div>
+
+          <button id="settings-close" onclick="closeSettings()">
+            CLOSE
+          </button>
+      </div>
+    </div>
+
     <canvas id="gamecanvas"></canvas>
 
     <div id="bot-bar">
