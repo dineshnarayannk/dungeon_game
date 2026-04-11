@@ -302,6 +302,7 @@ function collectItems() {
     if (currentLevel < LEVELS.length - 1) {
       gameState = 'levelcoplete';
       // Show the level complete screen
+      saveProgress(currentLevel);
       setTimeout(() => showLevelComplete(currentLevel), 100);
     }
   }

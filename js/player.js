@@ -3,8 +3,8 @@ let player = {
   y: 1.5,
   angle: 0,
   hp: 100,
-  speed: 0.05,
-  turnSpeed: 0.025,
+  speed: 0.035,
+  turnSpeed: 0.015,
 };
 
 const keysDown = {};

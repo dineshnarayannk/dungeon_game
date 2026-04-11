@@ -23,6 +23,7 @@ let shieldActive = false;
 let shieldTimer = 0;
 let lcLevel = 0;
 let globalVolume = 0.7;
+let selectedStartLevel = 0;
 
 // ── LOAD LEVEL ────────────────────────────────────────────────
 function loadLevel(idx) {
@@ -74,7 +75,7 @@ function loadLevel(idx) {
 function initGame() {
   const home = document.getElementById('home-screen');
   if (home) home.classList.add('hidden');
-  currentLevel = 0;
+  currentLevel = selectedStartLevel || 0;
   score        = 0;
   kills        = 0;
   player.hp    = 100;
@@ -135,6 +136,7 @@ function goMainMenu() {
   gameStarted = false;
   currentLevel = 0;
   score = 0; kills = 0 ; 
+  selectedStartLevel = 0;
   enemies = []; particles = []; killFeed = [];
   exitVisible = false; damageFlashTimer = 0; waveTimer = 0;
   document.exitPointerLock();
@@ -150,11 +152,137 @@ function goMainMenu() {
   hideLevelComplete();
 } 
 
-function startGameFromHome() {
+// LEVEL SELECT
+function openLevelSelect() {
+  const screen = document.getElementById('level-select-screen');
+  if (!screen) return;
+
+  buildLevelGrid();
+  screen.classList.remove('hidden');
+
+  // Hide home screen
   const home = document.getElementById('home-screen');
   if (home) home.classList.add('hidden');
+}
+
+function closeLevelSelect() {
+  const screen = document.getElementById('level-select-screen');
+  if (screen) screen.classList.add('hidden');
+
+  // Show home screen
+  const home = document.getElementById('home-screen');
+  if (home) home.classList.remove('hidden');
+}
+
+function buildLevelGrid() {
+  const grid = document.getElementById('ls-grid');
+  if (!grid) return;
+  grid.innerHTML = '';
+
+  // Build  buttons for levels 1-10
+  for (let i = 0; i < LEVELS.length - 1 ; i++){
+    const btn  = document.createElement('div');
+    const unlocked = isLevelUnlocked(i);
+    const complete = isLevelComplete(i);
+
+    btn.className = 'ls-level-btn' + 
+      (complete ? 'complete' : unlocked ? 'unlocked' : 'locked') ;
+
+    if (unlocked) {
+      btn.innerHTML = `
+        <div class="ls-level-num">${i + 1}</div>
+        <div class="ls-level-star">${complete ? '⭐' : ''}</div>
+      `;
+      btn.onclick = () => startLevelFromSelect(i);
+    } else {
+      btn.innerHTML = `<div class="ls-level-lock">🔒</div>`;
+    }
+
+    grid.appendChild(btn);
+  }
+
+  // Show boss button only if all 10 levels complete
+  const bossBtn = document.getElementById('ls-boss-btn');
+  if (bossBtn) {
+    if (isLevelUnlocked(LEVELS.length - 1)) {
+      bossBtn.classList.remove('hidden');
+      if (isLevelComplete(LEVELS.length - 1)) {
+        document.getElementById('ls-boss-icon').textContent = '👹⭐';
+      }
+    } else {
+      bossBtn.classList.add('hidden');
+    }
+  }
+}
+
+function startLevelFromSelect(idx) {
+  // HIde all overlay screens
+  const screen = document.getElementById('level-select-screen');
+  if (screen) screen.classList.add('hidden');
+  const home = document.getElementById('home-screen');
+  if (home) home.classList.add('hidden');
+  hideLevelComplete();
+
+  // Reset game State fully
+  selectedStartLevel = idx;
+  currentLevel = idx;
+  score = 0;
+  kills = 0;
+  player.x = LEVELS[idx].playerStart.x;
+  player.y = LEVELS[idx].playerStart.y;
+  player.hp = 100;
+  player.angle = 0;
+  gameState = 'playing';
+  isPaused = false;
   gameStarted = true;
-  initGame();
+  damageFlashTimer = 0;
+  waveTimer = 150;
+  wave = 1;
+  enemies = [];
+  particles = [];
+  killFeed = [];
+  exitVisible = false;
+
+  // Reset power-ups 
+  healthCharges = 2;
+  ammoCharges = 2;
+  shieldCharges = 2;
+  shieldActive = false;
+  shieldTimer = 0;
+  const sBtn = document.getElementById('shield-btn');
+  if (sBtn) sBtn.classList.remove('active');
+  updatePowerUI();
+
+  // reset weather
+  if (typeof dayTimer !== 'undefined') {
+    dayTimer = 0;
+    weatherTimer = 0;
+    dayPhase = 'day';
+    weatherPhase = 'clear';
+    rainDrops = [];
+  }
+
+  // Show pause button AND powerups
+  const pb = document.getElementById('pause-btn');
+  if (pb) { pb.textContent = '⏸'; pb.classList.remove('hidden'); }
+  const pw = document.getElementById('powerups');
+  if (pw) pw.classList.remove('hidden');
+
+  // Update level title
+  document.getElementById('level-title').textContent = 'DUNGEON 3D  —  LEVEL ' + (idx + 1) + ': ' + LEVELS[idx].name;
+  document.getElementById('lvl-val').textContent = idx + 1;
+
+  // Load the level properly
+  loadLevel(idx);
+
+  if (!gameStarted) {
+    gameStarted = true;
+    loop();
+  }
+}
+
+function startGameFromHome() {
+  openLevelSelect();
 }
 
 function openSettings() {
@@ -315,6 +443,7 @@ function drawHomePlayer() {
 
 function showLevelComplete(idx) {
   lcLevel = idx;
+  saveProgress(idx);
   const lv = LEVELS[idx];
   const screen = document.getElementById('level-complete-screen');
   const banner = document.getElementById('lc-banner');
@@ -1047,10 +1176,19 @@ canvas.addEventListener('mousedown', e => {
     return;
   }
 
+  // if (gameState === 'playing') {
+  //   canvas.requestPointerLock();
+  //   shoot();
+  //   return;
+  // }
   if (gameState === 'playing') {
-    canvas.requestPointerLock();
+    if (document.pointerLockElement !== canvas) {
+      canvas.requestPointerLock().catch(() => {});
+      return ;
+    }
+
     shoot();
-    return;
+    return; 
   }
 
   if (gameState === 'paused') {
@@ -1121,6 +1259,10 @@ canvas.addEventListener('mousemove', e => {
 
 // ── MAIN LOOP ─────────────────────────────────────────────────
 function loop() {
+  // Always keep running
+  requestAnimationFrame(loop);
+
+  handleInput();
   // Hide pause button on start screen 
   const pauseBtn = document.getElementById('pause-btn') ;
   if (pauseBtn) {
@@ -1139,7 +1281,7 @@ function loop() {
     }
   }
   
-  handleInput();
+  // handleInput();
   if (gameState === 'playing') {
     updateEnemies();
     collectItems();
@@ -1197,8 +1339,10 @@ function loop() {
     drawHomePlayer();
     updateHomeCoin();
   }
-  requestAnimationFrame(loop);
 }
 
 // ── START ─────────────────────────────────────────────────────
-loop();
+if (typeof loopStarted === 'undefined') {
+  window.loopStarted = true;
+  loop();
+}

@@ -351,9 +351,10 @@ function drawExit() {
 function checkExit() {
   if (!exitVisible) return;
   const ex = LEVELS[currentLevel].exit;
-  if (Math.sqrt((ex.x - player.x)**2 + (ex.y - player.y)**2 ) < 1.0 ){
+  if (Math.sqrt((ex.x - player.x)**2 + (ex.y - player.y)**2) < 1.0){
     gameState = 'win';
+    saveProgress(currentLevel);
     if (typeof playSound === 'function') playSound('win');
     setTimeout(() => showLevelComplete(currentLevel), 100);
   }
-}
+} 
