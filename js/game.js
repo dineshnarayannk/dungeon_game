@@ -24,6 +24,8 @@ let shieldTimer = 0;
 let lcLevel = 0;
 let globalVolume = 0.7;
 let selectedStartLevel = 0;
+let levelCoins = 0;
+let pendingLevelIdx = 0; // level waiting to start
 
 // ── LOAD LEVEL ────────────────────────────────────────────────
 function loadLevel(idx) {
@@ -52,6 +54,7 @@ function loadLevel(idx) {
   particles    = [];
   killFeed     = [];
   kills        = 0;
+  levelCoins   = 0;
 
   initSprites();
 
@@ -193,7 +196,7 @@ function buildLevelGrid() {
         <div class="ls-level-num">${i + 1}</div>
         <div class="ls-level-star">${complete ? '⭐' : ''}</div>
       `;
-      btn.onclick = () => startLevelFromSelect(i);
+      btn.onclick = () => showLevelCard(i);
     } else {
       btn.innerHTML = `<div class="ls-level-lock">🔒</div>`;
     }
@@ -213,6 +216,62 @@ function buildLevelGrid() {
       bossBtn.classList.add('hidden');
     }
   }
+}
+
+function showLevelCard(idx) {
+  const lv = LEVELS[idx];
+  const screen = document.getElementById('level-card-screen');
+  if (!screen) return ;
+
+  pendingLevelIdx = idx;
+
+  document.getElementById('lc-card-num').textContent = idx === LEVELS.length - 1 ? 'FINAL BOSS' : 'LEVEL ' + (idx + 1);
+  document.getElementById('lc-card-name').textContent = lv.name;
+  document.getElementById('lc-card-keys').textContent = idx === LEVELS.length - 1 ? '—' : lv.keysNeeded;
+  document.getElementById('lc-card-kills').textContent = idx === LEVELS.length - 1 ? 'DEFEAT THE BOSS' : lv.killsNeeded;
+  document.getElementById('lc-card-hp').textContent = idx === LEVELS.length - 1 ? '30' : lv.enemyHp;
+
+  // Tip per level
+  const tips = [
+    'Open corridors — good for beginnners!',
+    'Tight maze — dont get lost!',
+    'Symmetrical fortress — enemies hit hard!',
+    'Grid corridors — very disorienting!',
+    'Near darkness — stay alert!',
+    'Sewers — slippery paths ahead!',
+    'Ancient crypt — enemies are tougher!',
+    'The Void — barely any light!',
+    'Inferno — fastest enemies yet!',
+    'The Sanctum — the hardest dungeon!',
+    'No Keys. No Coins. Just the BOSS.',
+  ];
+  document.getElementById('lc-card-tip').textContent = tips[idx] || '' ;
+
+  // Hide level select and home
+  const ls = document.getElementById('level-select-screen');
+  if (ls) ls.classList.add('hidden');
+  const home = document.getElementById('home-screen');
+  if (home) home.classList.add('hidden');
+
+  screen.classList.remove('hidden');
+}
+
+function closeCard() {
+  const screen = document.getElementById('level-card-screen');
+  if (screen) screen.classList.add('hidden');
+
+  // Go back to level select 
+  const ls = document.getElementById('level-select-screen');
+  if (ls) {
+    ls.classList.remove('hidden');
+    buildLevelGrid();
+  }
+}
+
+function startFromCard() {
+  const screen = document.getElementById('level-card-screen');
+  if (screen) screen.classList.add('hidden');
+  startLevelFromSelect(pendingLevelIdx);
 }
 
 function startLevelFromSelect(idx) {
@@ -320,9 +379,9 @@ function openGuns() {
 }
 
 // Update home screen coin count
-function updateHomeCoin(){
+function updateHomeCoin() {
   const el = document.getElementById('home-coin-count');
-  if (el) el.textContent = score;
+  if (el) el.textContent = getTotalCoins().toLocaleString();
 }
 
 // Draw animated player character on home screen
@@ -444,6 +503,7 @@ function drawHomePlayer() {
 function showLevelComplete(idx) {
   lcLevel = idx;
   saveProgress(idx);
+  saveCoins(score); // <- save the full score as coins
   const lv = LEVELS[idx];
   const screen = document.getElementById('level-complete-screen');
   const banner = document.getElementById('lc-banner');
@@ -492,9 +552,7 @@ function lcRetry() {
 function lcNext() {
   hideLevelComplete();
   if (lcLevel + 1 < LEVELS.length) {
-    currentLevel = lcLevel + 1;
-    gameState = 'playing';
-    loadLevel(currentLevel);
+    showLevelCard(lcLevel + 1);
   }
 }
 
@@ -565,6 +623,7 @@ function shoot() {
   shootCooldown = 15;
   muzzleFlash   = 6;
 
+
   playSound('shoot');
 
   let sin = Math.sin(player.angle);
@@ -597,6 +656,7 @@ function shoot() {
           playSound('enemyDie');
           kills++;
           score += 500;
+          levelCoins += 500;
           exitVisible = true;
           killFeed.unshift({msg: 'BOSS DEFEATED!  +500', timer:120});
           if (killFeed.length > 4) killFeed.pop();
@@ -636,6 +696,7 @@ function shoot() {
           playSound('enemyDie');
           kills++;
           score += 100;
+          levelCoins += 100;
           killFeed.unshift({ msg: '+100  ENEMY DOWN', timer: 60 });
           if (killFeed.length > 4) killFeed.pop();
           if (Math.random() < 0.4) {
@@ -949,20 +1010,6 @@ function drawHUD() {
   });
   ctx.textAlign = 'left';
 
-  // Wave / level banner
-  if (waveTimer > 0 && currentLevel !== LEVELS.length - 1) {
-    let alpha = Math.min(1, waveTimer / 40);
-    ctx.fillStyle = `rgba(255,200,0,${alpha})`;
-    ctx.font      = 'bold 32px monospace';
-    ctx.textAlign = 'center';
-    ctx.fillText('LEVEL ' + (currentLevel + 1) + '  —  ' + lv.name, W / 2, H / 2 - 40);
-    ctx.fillStyle = `rgba(200,200,200,${alpha})`;
-    ctx.font      = 'bold 20px monospace';
-    ctx.fillText( 'Find ' + lv.keysNeeded + ' keys   +   Kills ' + lv.killsNeeded + ' enemies', W/2 , H/2 + 10) ;
-    ctx.textAlign = 'left';
-    waveTimer--;
-  }
-
   // Flash message
   if (flashTimer > 0) {
     ctx.fillStyle = `rgba(255,255,255,${flashTimer / 40 * 0.9})`;
@@ -1138,7 +1185,7 @@ function drawCountdown() {
 // ── UPDATE HTML HUD ───────────────────────────────────────────
 function updateHUD() {
   document.getElementById('hp-val').textContent    = Math.max(0, Math.floor(player.hp));
-  document.getElementById('coin-val').textContent  = score;
+  document.getElementById('coin-val').textContent  = getTotalCoins() + levelCoins;
   document.getElementById('key-val').textContent   = collectedKeys + '/' + LEVELS[currentLevel].keysNeeded;
   document.getElementById('pos-val').textContent   = Math.floor(player.x) + ',' + Math.floor(player.y);
   document.getElementById('score-val').textContent = score;
@@ -1157,7 +1204,7 @@ function updateHUD() {
       if (!keysOk && !killsOk) {
         msg.textContent = 'Collect  ' + lv.keysNeeded + ' keys  +  Kill ' + lv.killsNeeded + ' enemies to open the gate!';
       } else if ( !keysOk) {
-        msg.textContent = 'Need ' + (lv.keysNeeded - colllectedKeys) + ' more keys to open the gate!' ;
+        msg.textContent = 'Need ' + (lv.keysNeeded - collectedKeys) + ' more keys to open the gate!' ;
       } else if (!killsOk) {
         msg.textContent = 'Kills ' + (lv.killsNeeded - kills) +  ' more enemies to open the gate!';
       }
@@ -1223,7 +1270,7 @@ canvas.addEventListener('mousemove', e => {
   player.angle += e.movementX * 0.002;
 }); 
 
-canvas.addEventListener('contextMenu', e => {
+canvas.addEventListener('contextmenu', e => {
   e.preventDefault();
 });
 
@@ -1264,13 +1311,14 @@ function loop() {
 
   handleInput();
   // Hide pause button on start screen 
-  const pauseBtn = document.getElementById('pause-btn') ;
+  const pauseBtn = document.getElementById('pause-btn');
   if (pauseBtn) {
-    if (gameState === 'start') {
-      pauseBtn.classList.add('hidden');
-    } else {
-      pauseBtn.classList.remove('hidden');
-    }
+    const showPause = 
+      gameState === 'playing' || 
+      gameState === 'paused' ||
+      gameState === 'countdown';
+
+    pauseBtn.classList.toggle('hidden', !showPause);
   }
   const pw = document.getElementById('powerups') ;
   if (pw) {

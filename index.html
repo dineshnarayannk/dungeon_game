@@ -54,7 +54,11 @@
       <!-- Title -->
       <div id="home-title">DUNGEON 3D</div>
       <div id="home-subtitle">SURVIVE  ·  FIGHT  ·  ESCAPE</div>
-
+      <!--- Coins Display -->
+      <div id="home-coins-display">
+        <span>💰</span>
+        <span id="home-coin-count">0</span>
+      </div>
       <!--- Main Layout - left buttons + player + right button -->
       <div id="home-main-row">
         <!-- LEFT SIDE - Settings and Guns-->
@@ -82,15 +86,7 @@
         </div>
       </div>
 
-      <!-- Level pills at bottom -->
-      <div id="home-levels">
-        <span class="home-level-pill" style="color:#7c6fff;">LVL 1 — THE DUNGEON</span>
-        <span class="home-level-pill" style="color:#2ecc71;">LVL 2 — THE MAZE</span>
-        <span class="home-level-pill" style="color:#e74c3c;">LVL 3 — THE FORTRESS</span>
-        <span class="home-level-pill" style="color:#9b59b6;">LVL 4 — THE CATACOMBS</span>
-        <span class="home-level-pill" style="color:#888;">LVL 5 — THE ABYSS</span>
-        <span class="home-level-pill" style="color:#e74c3c;">FINAL BOSS — THE ARENA</span>
-      </div>
+      
     </div>
 
     <!-- LEVEL SELECT SCREEN -->
@@ -103,7 +99,7 @@
         </div>
 
         <!-- Boss button - only shows when all 10 levels done -->
-        <div id="ls-boss-btn" class="hidden" onclick="startLevelFromSelect(10)">
+        <div id="ls-boss-btn" class="hidden" onclick="showLevelCard(10)">
           <span id="ls-boss-icon">👹</span>
           <span id="ls-boss-label">FINAL BOSS</span>
           <span id="ls-boss-sub">THE ARENA</span>
@@ -196,6 +192,41 @@
       </div>
     </div>
   </div>
+
+  <!-- Level Info Card -->
+  <div id="level-card-screen" class="hidden" >
+    <div id="lc-card-panel">
+      <div id="lc-card-num">LEVEL 1</div>
+      <div id="lc-card-name">THE DUNGEON</div>
+      <div id="lc-card-divider"></div>
+      <div id="lc-card-requirements">
+        <div class="lc-req-row">
+          <span class="lc-req-icon">🔑</span>
+          <span class="lc-req-label">Keys to Collect</span>
+          <span class="lc-req-val" id="lc-card-keys">3</span>
+        </div>
+        <div class="lc-req-row">
+          <span class="lc-req-icon">💀</span>
+          <span class="lc-req-label">Enemies to kill</span>
+          <span class="lc-req-val" id="lc-card-kills">4</span>
+        </div>
+        <div class="lc-req-row">
+          <span class="lc-req-icon">👾</span>
+          <span class="lc-req-label">Enemy HP</span>
+          <span class="lc-req-val" id="lc-card-hp">2</span>
+        </div>
+      </div>
+      <div id="lc-card-tip"></div>
+      <button id="lc-card-start-btn" onclick="startFromCard()">
+        ▶ START LEVEL
+      </button>
+      <button id="lc-card-back-btn" onclick="closeCard()">
+        ← BACK
+      </button>
+    </div>
+  </div>
+
+
 
 </body>
 </html>

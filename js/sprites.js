@@ -265,12 +265,13 @@ function collectItems() {
   coins.forEach(c => {
     if (!c.alive) return;
     let d = Math.sqrt((c.x - player.x) ** 2 + (c.y - player.y) ** 2);
-    if (d < 0.6) {
-      c.alive  = false;
-      score   += 10;
+    if ( d < 0.6) {
+      c.alive = false;
+      score += 10;
+      levelCoins += 10;
       flashMsg = '+10 COIN!';
       flashTimer = 40;
-      playSound('coin');
+      if (typeof playSound === 'function') playSound('coin');
     }
   });
 
