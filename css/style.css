@@ -51,7 +51,7 @@ body {
   justify-content: flex-end;
   overflow: hidden;
 }
-
+ 
 .hud-item {
   font-size: 11px;
   color: #888;
@@ -1079,6 +1079,281 @@ body {
 }
 
 #lc-card-back-btn:hover {
+  background: rgba(124,111,255,0.1);
+  color: #fff;
+}
+
+/* GUNS SCREEN */
+#guns-screen {
+  position: absolute;
+  top: 80; left: 0;
+  width: 100% ; height: 100%;
+  z-index: 65;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,10,0.95);
+}
+
+#guns-screen.hidden { display : none; }
+
+#guns-panel {
+  background: linear-gradient(160deg, #0a0a1a, #111128);
+  border: 3px solid #e8b84b;
+  border-radius: 20px;
+  padding: 28px 32px;
+  width: 640px;
+  max-width: 96vw;
+  box-shadow: 0 0 60px rgba(232,184,75,0.2);
+}
+
+#guns-title {
+  font-family: monospace;
+  font-size: 26px;
+  font-weight: bold;
+  color: #FFD700;
+  text-align: center;
+  letter-spacing: 4px;
+  margin-bottom: 6px;
+  text-shadow: 0 0 20px rgba(255,215,0,0.4);
+}
+
+#guns-coins-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-family: monospace;
+  font-size: 18px;
+  font-weight: bold;
+  color: #FFD700;
+  margin-bottom: 20px;
+}
+
+#guns-carousel-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+#guns-carousel {
+  display: flex;
+  gap: 14px;
+  overflow: hidden;
+  flex: 1;
+  justify-content: center;
+}
+
+.guns-card {
+  min-width: 130px;
+  max-width: 130px;
+  background: rgba(255,255,255,0.04);
+  border: 2px solid rgba(255,255,255,0.1);
+  border-radius: 14px;
+  padding: 14px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: transform 0.15s, border-color 0.2s, box-shadow 0.2s;
+  user-select: none;
+  position: relative;
+}
+
+.gun-card:hover {
+  transform: scale(1.05);
+  border-color: rgba(232,184,75,0.5);
+}
+
+.gun-card.selected {
+  border-color: #FFD700;
+  box-shadow: 0 0 18px rgba(255,215,0,0.4);
+  background: rgba(232,184,75,0.07);
+}
+
+.gun-card.equipped {
+  border-color: #2ecc71;
+  box-shadow: 0 0 18px rgba(46,204,113,0.4);
+}
+
+.gun-card-canvas {
+  width: 100px;
+  height: 80px;
+  border-radius: 8px;
+  background: rgba(0,0,0,0.3);
+}
+
+.gun-card-name {
+  font-family: monospace;
+  font-size: 11px;
+  font-weight: bold;
+  color: #fff;
+  text-align: center;
+  letter-spacing: 1px;
+}
+
+.gun-card-price {
+  font-family: monospace;
+  font-size: 11px;
+  color: #FFD700;
+}
+
+.gun-card-badge {
+  position: absolute;
+  top: -8px; left: -8px;
+  background: #2ecc71;
+  color: #fff;
+  font-family: monospace;
+  font-size: 9px;
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: 8px;
+}
+
+.gun-card-locked-badge {
+  position: absolute;
+  top: -8px; right: -8px;
+  background: #e74c3c;
+  color: #fff;
+  font-family: monospace;
+  font-size: 9px;
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: 8px;
+}
+
+.guns-nav-btn {
+  background: rgba(255,255,255,0.08);
+  border: 2px solid rgba(255,255,255,0.15);
+  color: #fff;
+  font-size: 28px;
+  width: 40px;
+  height: 60px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+
+.guns-nav-btn:hover { background: rgba(255,255,255,0.15); }
+
+#guns-info-panel {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 14px;
+  padding: 16px 20px;
+  margin-bottom: 16px;
+}
+
+#guns-info-name {
+  font-family: monospace;
+  font-size: 18px;
+  font-weight: bold;
+  color: #FFD700;
+  margin-bottom: 6px;
+  letter-spacing: 2px;
+}
+
+#guns-info-desc {
+  font-family: monospace;
+  font-size: 12px;
+  color: #888;
+  margin-bottom: 12px;
+  line-height: 1.6;
+}
+
+#guns-info-stats {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.gun-stat {
+  background: rgba(255,255,255,0.06);
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-family: monospace;
+  font-size: 11px;
+  color: #aaa;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 70px;
+}
+
+.gun-stat b {
+  font-size: 14px;
+  color: #fff;
+}
+
+#guns-action-row {
+  display: flex;
+  gap: 10px;
+}
+
+#guns-buy-btn {
+  flex: 1;
+  padding: 10px;
+  background: linear-gradient(135deg, #e8b84b, #a06800);
+  color: #3a2000;
+  border: none;
+  border-radius: 10px;
+  font-family: monospace;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  letter-spacing: 2px;
+  transition: transform 0.15s;
+}
+
+#guns-buy-btn:hover { transform: scale(1.03); }
+#guns-buy-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+}
+
+#guns-equip-btn {
+  flex: 1;
+  padding: 10px;
+  background: linear-gradient(135deg, #2ecc71, #1a7a40);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-family: monospace;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  letter-spacing: 2px;
+  transition: transform 0.15s;
+}
+
+#guns-equip-btn:hover { transform: scale(1.03); }
+#guns-equip-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+}
+
+#guns-back-btn {
+  width: 100%;
+  padding: 10px;
+  background: transparent;
+  color: #7c6fff;
+  border: 1px solid rgba(124,111,255,0.3);
+  border-radius: 10px;
+  font-family: monospace;
+  font-size: 13px;
+  cursor: pointer;
+  letter-spacing: 2px;
+  transition: background 0.15s;
+}
+
+#guns-back-btn:hover {
   background: rgba(124,111,255,0.1);
   color: #fff;
 }

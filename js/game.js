@@ -41,13 +41,15 @@ function loadLevel(idx) {
   if (idx === LEVELS.length - 1){
     // Boss arena - fully restore HP and ammo
     player.hp = 100;
-    ammo = 35;
+    const eg = (typeof getEquippedGun === 'function') ? getEquippedGun() : null;
+    ammo = eg ? eg.ammoMax : 35;
     initBoss();
   }else {
     player.hp = Math.min(100,player.hp + 30) ;
   }
 
-  ammo         = 30;
+  const eg = (typeof getEquippedGun === 'function') ? getEquippedGun() : null;
+  ammo = eg ? eg.ammoMax : 30;
   wave         = 1;
   waveTimer    = 150;
   enemies      = [];
@@ -79,6 +81,8 @@ function initGame() {
   const home = document.getElementById('home-screen');
   if (home) home.classList.add('hidden');
   currentLevel = selectedStartLevel || 0;
+  const gd = loadGunData();
+  equippedGunId = gd.equipped || 'pistol';
   score        = 0;
   kills        = 0;
   player.hp    = 100;
@@ -354,6 +358,22 @@ function closeSettings() {
   if (s) s.classList.add('hidden');
 }
 
+function openGuns() {
+  const screen = document.getElementById('guns-screen');
+  if (!screen) return;
+  const home = document.getElementById('home-screen');
+  if (home) home.classList.add('hidden');
+  screen.classList.remove('hidden');
+  if (typeof buildGunsCarousel === 'function') buildGunsCarousel();
+}
+
+function closeGuns() {
+  const screen = document.getElementById('guns-screen');
+  if (screen) screen.classList.add('hidden');
+  const home = document.getElementById('home-screen');
+  if (home) home.classList.remove('hidden');
+}
+
 function changeVolume(val) {
   globalVolume = val / 100 ;
   // Update all sound volumes
@@ -372,10 +392,6 @@ function openSupport() {
     'Issue: %0A%0ADevice: ' + navigator.userAgent,
     '_blank'
   );
-}
-
-function openGuns() {
-  alert('Guns feature coming soon!');
 }
 
 // Update home screen coin count
@@ -618,10 +634,15 @@ function updatePowerUI() {
 
 // ── SHOOT ─────────────────────────────────────────────────────
 function shoot() {
+  const activeGun = (typeof getEquippedGun === 'function') ? getEquippedGun() : null;
+  const gunCooldown = activeGun ? activeGun.cooldown : 15;
+  const gunDamage = activeGun ? activeGun.damage : 1;
+  const gunSpread = activeGun ? activeGun.spread : 0;
+
   if (ammo <= 0 || shootCooldown > 0 || gameState !== 'playing') return;
   ammo--;
-  shootCooldown = 15;
-  muzzleFlash   = 6;
+  shootCooldown = gunCooldown;
+  muzzleFlash = 6;
 
 
   playSound('shoot');
@@ -638,7 +659,7 @@ function shoot() {
     if (currentLevel === LEVELS.length - 1 && boss.alive) {
       let dx = boss.x - bx , dy = boss.y - by;
       if (Math.sqrt(dx*dx + dy*dy) < 0.7){
-        boss.hp--;
+        boss.hp -= gunDamage;
         boss.flashTimer = 8;
 
         // Blood Particles
@@ -680,7 +701,7 @@ function shoot() {
       if (!e.alive) continue;
       let dx = e.x - bx, dy = e.y - by;
       if (Math.sqrt(dx * dx + dy * dy) < 0.4) {
-        e.hp--;
+        e.hp -= gunDamage;
         e.flashTimer = 8;
         for (let p = 0; p < 6; p++) {
           particles.push({
@@ -736,13 +757,17 @@ function drawParticles() {
 
 // ── DRAW GUN ──────────────────────────────────────────────────
 function drawGun() {
+  const activeGun = (typeof getEquippedGun === 'function') ? getEquippedGun() : null;
   let bob = Math.sin(Date.now() * 0.008) * 4;
-  let gx  = W / 2 + 120;
-  let gy  = H - 20 + bob;
+  let gx = W / 2 + 120;
+  let gy = H - 20 + bob;
 
-  // Muzzle flash
   if (muzzleFlash > 0) {
-    ctx.fillStyle = `rgba(255,200,0,${muzzleFlash / 6 * 0.9})`;
+    let flashColor = activeGun && activeGun.id === 'plasma' ? 'rgba(0,200,255,' :
+                     activeGun && activeGun.id === 'inferno' ? 'rgba(255,80,0,' : 
+                     activeGun && activeGun.id === 'sniper' ? 'rgba(180,0,255,' :
+                                                              'rgba(255,200,0,';
+    ctx.fillStyle = `${flashColor}${muzzleFlash / 6 * 0.9})`;
     ctx.beginPath();
     ctx.arc(gx, gy - 130, 28, 0, Math.PI * 2);
     ctx.fill();
@@ -752,26 +777,86 @@ function drawGun() {
     ctx.fill();
     muzzleFlash--;
   }
+  
+  const c = activeGun ? activeGun.color : '#888';
 
-  // Barrel
-  ctx.fillStyle = '#888';
-  ctx.fillRect(gx - 10, gy - 140, 22, 90);
+  if (!activeGun || activeGun.id === 'pistol') {
+    ctx.fillStyle = '#888'; ctx.fillRect(gx-10, gy-140, 22, 90);
+    ctx.fillStyle = '#666'; ctx.fillRect(gx-26, gy-55, 54, 48);
+    ctx.fillStyle = '#555'; ctx.fillRect(gx-10, gy-10, 22, 45);
+    ctx.fillStyle = '#777'; ctx.fillRect(gx-24, gy-48, 10, 20);
+    ctx.fillStyle = '#999'; ctx.fillRect(gx-8, gy-138, 18, 8);
 
-  // Body
-  ctx.fillStyle = '#666';
-  ctx.fillRect(gx - 26, gy - 55, 54, 48);
+  } else if (activeGun.id === 'shotgun') {
+    ctx.fillStyle = c;
+    ctx.fillRect(gx-12, gy-145, 14,6);
+    ctx.fillRect(gx+2, gy-145, 14, 6);
+    ctx.fillRect(gx-12, gy-140, 30, 88);
+    ctx.fillStyle = '#8B4513';
+    ctx.fillRect(gx-28, gy-55, 58, 50);
+    ctx.fillStyle = '#5a3010';
+    ctx.fillRect(gx-16, gy-10, 26, 45);
 
-  // Grip
-  ctx.fillStyle = '#555';
-  ctx.fillRect(gx - 10, gy - 10, 22, 45);
+  } else if (activeGun.id === 'rifle') {
+    ctx.fillStyle = c;
+    ctx.fillRect(gx-8, gy-150, 18, 100);
+    ctx.fillStyle = '#1a3a5a';
+    ctx.fillRect(gx-28, gy-55, 58, 45);
+    ctx.fillStyle = '#0a2a4a';
+    ctx.fillRect(gx-14, gy-12, 26, 45);
+    ctx.fillStyle = '#aaccff';
+    ctx.fillRect(gx-6, gy-150, 14, 8);
+    ctx.fillStyle = c;
+    ctx.fillRect(gx-34, gy-40, 8, 22);
 
-  // Trigger guard
-  ctx.fillStyle = '#777';
-  ctx.fillRect(gx - 24, gy - 48, 10, 20);
+  } else if (activeGun.id === 'sniper') {
+    ctx.fillStyle = c;
+    ctx.fillRect(gx-6, gy-155, 14, 110);
+    ctx.fillStyle = '#220033';
+    ctx.fillRect(gx-28, gy-55, 58, 42);
+    ctx.fillStyle = '#440066';
+    ctx.fillRect(gx-8, gy-20, 18, 45);
+    ctx.fillStyle = '#cc99ff';
+    ctx.shadowColor = '#9933cc'; ctx.shadowBlur = 10;
+    ctx.beginPath();
+    ctx.arc(gx+1, gy-152, 10, 0, Math.PI*2); ctx.fill();
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = '#fff';
+    ctx.beginPath();
+    ctx.arc(gx+1, gy-152, 5, 0 ,Math.PI*2); ctx.fill();
 
-  // Top rail
-  ctx.fillStyle = '#999';
-  ctx.fillRect(gx - 8, gy - 138, 18, 8);
+  } else if (activeGun.id === 'plasma') {
+    ctx.fillStyle = '#004444';
+    ctx.fillRect(gx-22, gy-55, 46, 55);
+    ctx.fillStyle = c;
+    ctx.fillRect(gx-10, gy-140, 22, 88);
+    ctx.fillStyle = '#00ffff';
+    ctx.shadowColor = '#00ffff'; ctx.shadowBlur = 16;
+    ctx.beginPath();
+    ctx.arc(gx+1, gy-138, 12, 0, Math.PI*2); ctx.fill();
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = '#006666';
+    ctx.fillRect(gx-16, gy-12, 34, 45);
+    ctx.fillStyle = '#00aaaa';
+    ctx.fillRect(gx-28, gy-35, 8, 22);
+    ctx.fillRect(gx+22, gy-35, 8, 22);
+
+  } else if (activeGun.id === 'inferno') {
+    ctx.fillStyle = '#330000';
+    ctx.fillRect(gx-24, gy-55, 50, 55);
+    ctx.fillStyle = c;
+    ctx.fillRect(gx-12, gy-140, 26, 88);
+    ctx.fillStyle = '#ff6600';
+    ctx.shadowColor = '#ff3300'; ctx.shadowBlur = 18;
+    ctx.fillRect(gx-8, gy-142, 10, 14);
+    ctx.fillRect(gx+4, gy-142, 10, 14);
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = '#ff3300';
+    ctx.fillRect(gx-28, gy-30, 8, 22);
+    ctx.fillRect(gx+22, gy-30, 8, 22);
+    ctx.fillStyle = '#660000';
+    ctx.fillRect(gx-18, gy-12, 38, 45);
+  }
 }
 
 // ── DRAW MINIMAP ──────────────────────────────────────────────

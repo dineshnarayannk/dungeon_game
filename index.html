@@ -111,6 +111,36 @@
       </div>
     </div>
 
+    <!--- GUNS SCREEN   -->
+    <div id="guns-screen" class="hidden">
+      <div id="guns-panel">
+        <div id="guns-title">🔫 ARMORY</div>
+        <div id="guns-coins-bar">
+          <span>💰</span>
+          <span id="guns-coins-count">0</span>
+          <span style="color:#666; font-size:12px; margin-left: 6px;">coins</span>
+        </div>
+
+        <div id="guns-carousel-wrap">
+          <button class="guns-nav-btn" id="guns-prev" onclick="scrollGuns(-1)">‹</button>
+          <div id="guns-carousel"></div>
+          <button class="guns-nav-btn" id="guns-next" onclick="scrollGuns(1)">›</button>
+        </div>
+
+        <div id="guns-info-panel">
+          <div id="guns-info-name"></div>
+          <div id="guns-info-desc"></div>
+          <div id="guns-info-stats"></div>
+          <div id="guns-action-row">
+            <button id="guns-buy-btn" onclick="buyGun()">BUY</button>
+            <button id="guns-equip-btn" onclick="equipGun()">EQUIP</button>
+          </div>
+        </div>
+
+        <button id="guns-back-btn" onclick="closeGuns()">← BACK TO MENU</button>
+      </div>
+    </div>
+
     <!-- SETTINGS SCREEN -->
     <div id="settings-screen" class="hidden">
       <div id="settings-panel">
@@ -171,6 +201,7 @@
   <script src="js/enemies.js"></script>
   <script src="js/sound.js"></script>
   <script src="js/weather.js"></script>
+  <script src="js/guns.js"></script>
   <script src="js/game.js"></script>
 
   <div id="level-complete-screen" class="hidden">
