@@ -1145,7 +1145,7 @@ body {
   justify-content: center;
 }
 
-.guns-card {
+.gun-card {
   min-width: 130px;
   max-width: 130px;
   background: rgba(255,255,255,0.04);
@@ -1202,7 +1202,7 @@ body {
 
 .gun-card-badge {
   position: absolute;
-  top: -8px; left: -8px;
+  top: -2px; left: -8px;
   background: #2ecc71;
   color: #fff;
   font-family: monospace;
@@ -1214,7 +1214,7 @@ body {
 
 .gun-card-locked-badge {
   position: absolute;
-  top: -8px; right: -8px;
+  top: -2px; right: -8px;
   background: #e74c3c;
   color: #fff;
   font-family: monospace;

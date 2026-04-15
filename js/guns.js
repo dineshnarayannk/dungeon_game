@@ -6,7 +6,7 @@ const GUN_DEFS = [
         price: 0,
         damage: 1,
         cooldown: 15,
-        ammoMax: 30,
+        ammoMax: 20,
         spread: 0,
         desc: 'Standard issue sidearm. Reliable and free.',
         color: '#888888',
@@ -16,9 +16,9 @@ const GUN_DEFS = [
         id: 'shotgun',
         name: 'HELLFIRE SHOTGUN',
         price: 700,
-        damage: 1,
+        damage: 2,
         cooldown: 40,
-        ammoMax: 15,
+        ammoMax: 25,
         spread: 3,
         desc: 'Fires 3 pellets in a spread. Devastating at close range.',
         color: '#cc6600',
@@ -28,9 +28,9 @@ const GUN_DEFS = [
         id: 'rifle',
         name: 'SHADOW RIFLE',
         price: 1500,
-        damage: 2,
+        damage: 3,
         cooldown: 8,
-        ammoMax: 20,
+        ammoMax: 30,
         spread: 0,
         desc: 'Fast firing. Deals double damage per shot.',
         color: '#336699',
@@ -54,7 +54,7 @@ const GUN_DEFS = [
         price: 3000,
         damage: 3,
         cooldown: 25,
-        ammoMax: 18,
+        ammoMax: 35,
         spread: 0,
         desc: 'Energy weapon. High damage with medium fire rate.',
         color: '#00cccc',
@@ -66,7 +66,7 @@ const GUN_DEFS = [
         price: 3500,
         damage: 4,
         cooldown: 20,
-        ammoMax: 25,
+        ammoMax: 30,
         spread: 2,
         desc: 'The ultimate weapon. High damage spread fire.',
         color: '#ff3300',
@@ -202,40 +202,37 @@ function buildGunsCarousel() {
     carousel.innerHTML = '';
 
     const data = loadGunData();
+    const gun = GUN_DEFS[selectedGunIdx];
+    const owned = data.owned.includes(gun.id);
+    const equip = data.equipped === gun.id;
 
-    GUN_DEFS.forEach((gun,i) => {
-        const owned = data.owned.includes(gun.id);
-        const equip = data.equipped === gun.id;
+    const card = document.createElement('div');
+    card.className = 'gun-card' + (equip ? ' equipped' : '');
 
-        const card = document.createElement('div');
-        card.className = 'gun-card' + (i === selectedGunIdx ? ' selected' : '') + (equip ? ' equipped' : '');
-        card.onclick = () => selectGun(i);
+    if (equip) {
+        card.innerHTML += '<div class="gun-card-badge">EQUIPPED</div>';
+    } else if (!owned) {
+        card.innerHTML += '<div class="gun-card-locked-badge">LOCKED</div>';
+    }
 
-        if (equip) {
-            card.innerHTML += '<div class="gun-card-badge">EQUIPPED</div>';
-        } else if (!owned) {
-            card.innerHTML += `<div class="gun-card-locked-badge">🔒</div>`;
-        }
+    const cv = document.createElement('canvas');
+    cv.className = 'gun-card-canvas';
+    cv.width = 100;
+    cv.height = 80;
+    card.appendChild(cv);
 
-        const cv = document.createElement('canvas');
-        cv.className = 'gun-card-canvas';
-        cv.width = 100;
-        cv.height = 80;
-        card.appendChild(cv);
+    const nm = document.createElement('div');
+    nm.className = 'gun-card-name';
+    nm.textContent = gun.name;
+    card.appendChild(nm);
 
-        const nm = document.createElement('div');
-        nm.className = 'gun-card-name';
-        nm.textContent = gun.name;
-        card.appendChild(nm);
+    const pr = document.createElement('div');
+    pr.className = 'gun-card-price';
+    pr.textContent = gun.price === 0 ? 'FREE' : '💰 ' + gun.price;
+    card.appendChild(pr);
 
-        const pr = document.createElement('div');
-        pr.className = 'gun-card-price';
-        pr.textContent = gun.price === 0 ? 'FREE' : '💰 ' + gun.price;
-        card.appendChild(pr);
-
-        carousel.appendChild(card);
-        drawGunOnCanvas(cv, gun);
-    });
+    carousel.appendChild(card);
+    drawGunOnCanvas(cv, gun);
 
     updateGunsInfo();
     updateGunsCoins();
@@ -251,13 +248,13 @@ function scrollGuns(dir) {
     buildGunsCarousel();
 
     // Scroll carousel to show selected card
-    const carousel = document.getElementById('guns-carousel');
-    if (carousel) {
-        const cards = carousel.querySelectorAll('.gun-card');
-        if (cards[selectedGunIdx]) {
-            cards[selectedGunIdx].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-        }
-    }
+    // const carousel = document.getElementById('guns-carousel');
+    // if (carousel) {
+    //     const cards = carousel.querySelectorAll('.gun-card');
+    //     if (cards[selectedGunIdx]) {
+    //         cards[selectedGunIdx].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    //     }
+    // }
 }
 
 function updateGunsInfo() {
@@ -308,7 +305,7 @@ function updateGunsInfo() {
 }
 
 function updateGunsCoins() {
-    const el = document.getElementById('guns-coin-count');
+    const el = document.getElementById('guns-coins-count');
     if (el) el.textContent = getTotalCoins();
 }
 

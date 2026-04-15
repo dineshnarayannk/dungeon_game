@@ -10,7 +10,7 @@ const H    = canvas.height;
 const HALF = H / 2;
 
 const FOV       = Math.PI / 3;
-const RAYS      = 160;
+const RAYS      = 480;
 const STEP      = FOV / RAYS;
 const MAX_DEPTH = 16;
 
@@ -21,7 +21,7 @@ function castRay(angle) {
   let cos = Math.cos(angle);
   let dist = 0, hit = false, wt = 0;
 
-  for (let d = 0; d < MAX_DEPTH; d += 0.05) {
+  for (let d = 0; d < MAX_DEPTH; d += 0.02) {
     let rx = player.x + cos * d;
     let ry = player.y + sin * d;
     if (isWall(rx, ry)) {

@@ -3,7 +3,7 @@ let player = {
   y: 1.5,
   angle: 0,
   hp: 100,
-  speed: 0.035,
+  speed: 0.03,
   turnSpeed: 0.015,
 };
 
@@ -23,8 +23,8 @@ document.addEventListener('keydown', e=> {
     }
   }
   if (e.key === 'Escape') {
+    e.preventDefault();
     togglePause();
-    document.exitPointerLock();
   }
   if (['ArrowUp', 'ArrowDown','ArrowLeft','ArrowRight'].includes(e.key))
     e.preventDefault();

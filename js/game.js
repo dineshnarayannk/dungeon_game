@@ -95,7 +95,7 @@ function initGame() {
   rainDrops = [];
   lightningTimer = 0;
   lightningAlpha = 0;
-  loadLevel(0);
+  loadLevel(currentLevel);
   document.getElementById('pause-btn').classList.remove('hidden');
   healthCharges = 2;
   ammoCharges = 2;
@@ -361,8 +361,14 @@ function closeSettings() {
 function openGuns() {
   const screen = document.getElementById('guns-screen');
   if (!screen) return;
+
   const home = document.getElementById('home-screen');
   if (home) home.classList.add('hidden');
+
+  const equippedGun = getEquippedGun();
+  selectedGunIdx = GUN_DEFS.findIndex(g => g.id === equippedGun.id);
+  if (selectedGunIdx < 0) selectedGunIdx = 0;
+
   screen.classList.remove('hidden');
   if (typeof buildGunsCarousel === 'function') buildGunsCarousel();
 }
@@ -545,6 +551,8 @@ function showLevelComplete(idx) {
   kl.textContent = 'KILLS: ' + kills;
 
   screen.classList.remove('hidden');
+  document.exitPointerLock();
+  canvas.style.cursor = 'default';
 
   // Pause the game while screen shows
   if (spawnInterval) { clearInterval(spawnInterval); spawnInterval = null; }

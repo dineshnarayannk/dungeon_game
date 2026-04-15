@@ -200,7 +200,7 @@ const LEVELS = [
     name: 'THE CRYPT',
     color: [50,30,70],
     color2: [35,20,50],
-    keysNeeded: 5, killNeeded: 10, SpawnCount: 8,
+    keysNeeded: 5, killsNeeded: 10, spawnCount: 8,
     enemyHp: 7, enemySpeed: 0.015,
     floorColor: '#080510', skyColor: '#050308',
     map: [
@@ -281,7 +281,7 @@ const LEVELS = [
   {
     name: 'THE SANCTUM',
     color: [80,60,20], color2: [60,40,10],
-    keysNeeded: 7, killsNeeded: 13, spawmCount: 10,
+    keysNeeded: 7, killsNeeded: 13, spawnCount: 10,
     enemyHp: 8, enemySpeed: 0.018,
     floorColor: '#0f0a02', skyColor: '#0a0701',
     map: [
